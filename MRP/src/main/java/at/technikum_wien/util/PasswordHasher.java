@@ -5,7 +5,6 @@ import at.favre.lib.crypto.bcrypt.BCrypt;
 public class PasswordHasher {
 
     public static String hashPassword(String plainTextPassword) {
-        // Use BCrypt with default cost factor (10)
         return BCrypt.withDefaults().hashToString(12, plainTextPassword.toCharArray());
     }
 

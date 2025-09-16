@@ -18,8 +18,7 @@ public class TestUserRepository {
         //test with existing username
         User foundByName=userRepo.getUserByUsername("testuser");
         if (foundByName != null) {
-            System.out.println("User found successfully!");
-            System.out.println("ID: " + foundByName.getId());
+            System.out.println("User found successfully! ID:  " + foundByName.getId());
         }else{
             System.out.println("Failed to find user by name");
         }

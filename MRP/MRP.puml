@@ -1,0 +1,58 @@
+@startuml
+class User{
+    id
+    name
+    pwd
+    created_at
+}
+
+class Rating{
+    id
+    media_id
+    user_id
+    stars
+    comment
+    confirmed
+    timestamp
+}
+
+class PasswordHasher{
+    hashPassword()
+    checkUserPwd()
+}
+
+class Media{
+    id
+    type
+    title
+    description
+    release_year
+    genre[]
+    age_restriction
+    creator_id
+}
+
+class Genres{
+    genre_id
+    name
+}
+
+class MediaGenres{
+    media_id
+    genre_id
+}
+
+class RatingLikes{
+    user_id
+    rating_id
+}
+
+User - Media
+User - Rating
+Media - Rating
+User - PasswordHasher
+Media - Genres
+Genres - MediaGenres
+RatingLikes - User
+RatingLikes - Ratings
+@enduml

@@ -2,7 +2,13 @@ package at.technikum_wien.model;
 
 import java.time.LocalDateTime;
 
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
+
 public class User {
+    //GETTER / SETTER
+
     private int id;
     private String username;
     private String passwordHash;
@@ -16,34 +22,4 @@ public class User {
     }
 
     public User(){}
-
-    //getter
-    public int getId() {
-        return id;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public String getPasswordHash() {
-        return passwordHash;
-    }
-
-    //setter
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public void setPasswordHash(String passwordHash) {
-        this.passwordHash = passwordHash;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
 }
