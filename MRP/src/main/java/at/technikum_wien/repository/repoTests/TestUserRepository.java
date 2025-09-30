@@ -1,13 +1,17 @@
-package at.technikum_wien.repository;
+package at.technikum_wien.repository.repoTests;
 
 import at.technikum_wien.model.User;
+import at.technikum_wien.repository.UserRepository;
+import at.technikum_wien.util.PasswordHasher;
 
 public class TestUserRepository {
     public static void main(String[] args) {
         UserRepository userRepo = new UserRepository();
-        User newUser = userRepo.createUser("testuser", "testpassword");
+        String hashedPWD= PasswordHasher.hashPassword("testpwd");
+        User newUser = new User("testuser",hashedPWD);
+        User savedUser=userRepo.save(newUser);
 
-        if (newUser != null) {
+        if (savedUser != null) {
             System.out.println("User created successfully!");
             System.out.println("ID: " + newUser.getId());
             System.out.println("Username: " + newUser.getUsername());
@@ -16,7 +20,7 @@ public class TestUserRepository {
         }
 
         //test with existing username
-        User foundByName=userRepo.getUserByUsername("testuser");
+        User foundByName=userRepo.getByName("testuser");
         if (foundByName != null) {
             System.out.println("User found successfully! ID:  " + foundByName.getId());
         }else{
@@ -24,13 +28,13 @@ public class TestUserRepository {
         }
 
         //test with non-existing name
-        User notFoundByName=userRepo.getUserByUsername("testuser2");
+        User notFoundByName=userRepo.getByName("testuser2");
         if(notFoundByName==null){
             System.out.println("Correctly: User not found by name");
         }
 
         //test with existing ID
-        User foundById = userRepo.getUserById(1); // Die ID von deinem testuser
+        User foundById = userRepo.getById(1);
         if (foundById != null) {
             System.out.println("Found by ID: " + foundById.getUsername());
         } else {
@@ -38,7 +42,7 @@ public class TestUserRepository {
         }
 
         //test with non-existing ID
-        User notFoundByID = userRepo.getUserById(999);
+        User notFoundByID = userRepo.getById(999);
         if (notFoundByID == null) {
             System.out.println("Correctly: User not found by ID");
         }
