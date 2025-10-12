@@ -4,7 +4,6 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter(AccessLevel.PUBLIC)
@@ -20,7 +19,7 @@ public class Media {
     private List<String> genres;
     private double rating;
 
-    public Media(int id,String type, String title, String description, int release_year, int age_restriction, int creator_id, List<String> genres) {
+    public Media(int id, String type, String title, String description, int release_year, int age_restriction, int creator_id, List<String> genres) {
         this.id = id;
         this.type = type;
         this.title = title;
@@ -41,10 +40,9 @@ public class Media {
         this.genres = genres;
     }
 
-    public double calculateAvgRating(){
+    public double calculateAvgRating() {
         return 0;
     }
-
 
 
 }

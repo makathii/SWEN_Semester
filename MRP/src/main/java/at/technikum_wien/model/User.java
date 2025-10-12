@@ -27,5 +27,6 @@ public class User {
         this.passwordHash = passwordHash;
     }
 
-    public User(){}
+    public User() {
+    }
 }

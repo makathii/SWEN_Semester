@@ -1,5 +1,6 @@
 package at.technikum_wien.main;
 
+import at.technikum_wien.handler.MediaHandler;
 import at.technikum_wien.handler.UserHandler;
 import com.sun.net.httpserver.HttpServer;
 
@@ -15,7 +16,7 @@ public class Server {
 
         //TODO: Register handlers here
         server.createContext("/api/users", new UserHandler());
-        //server.createContext("/api/media", new MediaHandler());
+        server.createContext("/api/media", new MediaHandler());
         //server.createContext("/api/ratings", new RatingHandler());
 
         server.start();

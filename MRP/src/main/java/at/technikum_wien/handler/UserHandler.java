@@ -22,18 +22,18 @@ public class UserHandler implements HttpHandler {
         String method = exchange.getRequestMethod();
         String path = exchange.getRequestURI().getPath();
 
-        String requestBody="";
-        if("POST".equals(method)||"PUT".equals(method)) {
-            requestBody=new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
+        String requestBody = "";
+        if ("POST".equals(method) || "PUT".equals(method)) {
+            requestBody = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
         }
 
         try {
             switch (method) {
                 case "POST":
                     if (path.equals("/api/users")) {
-                        handleRegister(exchange,requestBody);
+                        handleRegister(exchange, requestBody);
                     } else if (path.equals("/api/users/login")) {
-                        handleLogin(exchange,requestBody);
+                        handleLogin(exchange, requestBody);
                     } else {
                         sendResponse(exchange, 404, "Not Found");
                     }
@@ -50,7 +50,7 @@ public class UserHandler implements HttpHandler {
         }
     }
 
-    private void handleRegister(HttpExchange exchange,String requestBody) throws IOException {
+    private void handleRegister(HttpExchange exchange, String requestBody) throws IOException {
         try {
             //parse JSON request
             Map<String, String> userData = JsonUtil.parseJson(requestBody);
