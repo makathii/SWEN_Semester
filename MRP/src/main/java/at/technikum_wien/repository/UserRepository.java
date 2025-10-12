@@ -1,14 +1,52 @@
 package at.technikum_wien.repository;
 
 import at.technikum_wien.model.User;
+import at.technikum_wien.repository.interfaces.IRepoDelete;
+import at.technikum_wien.repository.interfaces.IRepoGetByID;
+import at.technikum_wien.repository.interfaces.IRepoGetByName;
+import at.technikum_wien.repository.interfaces.IRepoSave;
 import at.technikum_wien.util.DatabaseConnection;
-import at.technikum_wien.util.PasswordHasher;
 
 import java.sql.*;
 
-public class UserRepository implements Repository<User> {
+public class UserRepository implements IRepoSave<User>, IRepoDelete<User>, IRepoGetByID<User>, IRepoGetByName<User> {
+    /*OLD CODE, ONLY FOR CHECKMARK EXERCISES
+    public User createUser(String username, String plainTextPassword) {
+        User newUser = null;
+
+        String passwordHash = "";
+
+        String sql = "INSERT INTO users (username, password_hash) VALUES (?, ?)";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) { // Ask for the generated ID
+
+            pstmt.setString(1, username);
+            pstmt.setString(2, passwordHash);
+
+            int affectedRows = pstmt.executeUpdate();
+            if (affectedRows > 0) {
+                try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        int newId = generatedKeys.getInt(1);
+                        newUser = new User();
+                        newUser.setId(newId);
+                        newUser.setUsername(username);
+                        newUser.setPasswordHash(passwordHash);
+                        newUser.setCreatedAt(new Timestamp(System.currentTimeMillis()));
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error creating user: " + e.getMessage());
+        }
+
+        return newUser;
+    }
+         */
 
     public User save(User user) {
+
         String sql="";
         if(user.getId()==0) {
             sql = "INSERT INTO users (username, password_hash) VALUES (?, ?)";

@@ -6,7 +6,7 @@ import at.technikum_wien.repository.RatingRepository;
 public class TestRatingRepository {
     public static void main(String[] args) {
         RatingRepository ratingRepo=new RatingRepository();
-        Rating newRating=new Rating(1,1,5,"testcomment");
+        Rating newRating=new Rating(9,1,5,"testcomment");
         Rating savedRating=ratingRepo.save(newRating);
 
         if(savedRating!=null){
@@ -19,6 +19,7 @@ public class TestRatingRepository {
         }else{
             System.out.println("Failed to save rating");
         }
+
         //test with existing id
         Rating existingRating=ratingRepo.getById(savedRating.getId());
         if(existingRating!=null){
@@ -26,6 +27,7 @@ public class TestRatingRepository {
         }else{
             System.out.println("Failed to find rating: ");
         }
+
         //test with non-existing id
         Rating non_existingRating=ratingRepo.getById(999);
         if(existingRating==null){

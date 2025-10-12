@@ -1,0 +1,10 @@
+/home/kathi/FHTW/Sem_3/SWEN/SWEN_Semester/MRP/src/main/java/at/technikum_wien/handler/UserHandler.java
+/home/kathi/FHTW/Sem_3/SWEN/SWEN_Semester/MRP/src/main/java/at/technikum_wien/main/Server.java
+/home/kathi/FHTW/Sem_3/SWEN/SWEN_Semester/MRP/src/main/java/at/technikum_wien/model/User.java
+/home/kathi/FHTW/Sem_3/SWEN/SWEN_Semester/MRP/src/main/java/at/technikum_wien/repository/MediaRepository.java
+/home/kathi/FHTW/Sem_3/SWEN/SWEN_Semester/MRP/src/main/java/at/technikum_wien/repository/RatingRepository.java
+/home/kathi/FHTW/Sem_3/SWEN/SWEN_Semester/MRP/src/main/java/at/technikum_wien/repository/TestUserRepository.java
+/home/kathi/FHTW/Sem_3/SWEN/SWEN_Semester/MRP/src/main/java/at/technikum_wien/repository/UserRepository.java
+/home/kathi/FHTW/Sem_3/SWEN/SWEN_Semester/MRP/src/main/java/at/technikum_wien/util/DatabaseConnection.java
+/home/kathi/FHTW/Sem_3/SWEN/SWEN_Semester/MRP/src/main/java/at/technikum_wien/util/PasswordHasher.java
+/home/kathi/FHTW/Sem_3/SWEN/SWEN_Semester/MRP/src/main/java/at/technikum_wien/util/TestConnection.java
