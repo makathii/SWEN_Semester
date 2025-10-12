@@ -144,4 +144,28 @@ public class UserRepository implements IRepoSave<User>, IRepoDelete<User>, IRepo
         }
         return foundUser;
     }
+
+    public User getByUsername(String username) {
+        User foundUser=null;
+        String sql="SELECT * FROM users WHERE username=?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, username);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    foundUser = new User();
+                    foundUser.setId(rs.getInt("id"));
+                    foundUser.setUsername(rs.getString("username"));
+                    foundUser.setPasswordHash(rs.getString("password_hash"));
+                    foundUser.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("Error finding user by Username: " + e.getMessage());
+        }
+
+        return foundUser;
+    }
 }

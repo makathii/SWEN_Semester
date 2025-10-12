@@ -1,5 +1,6 @@
 package at.technikum_wien.main;
 
+import at.technikum_wien.handler.UserHandler;
 import com.sun.net.httpserver.HttpServer;
 
 import java.io.IOException;
@@ -13,7 +14,7 @@ public class Server {
         System.out.println("Starting Media Ratings Platform server on port 8080...");
 
         //TODO: Register handlers here
-        //server.createContext("/api/users", new UserHandler());
+        server.createContext("/api/users", new UserHandler());
         //server.createContext("/api/media", new MediaHandler());
         //server.createContext("/api/ratings", new RatingHandler());
 

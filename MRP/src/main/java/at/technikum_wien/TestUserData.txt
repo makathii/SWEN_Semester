@@ -1,0 +1,7 @@
+TestUser1:
+username: testuser
+pwd: testpwd
+
+TestUser2:
+username: RegisterUser
+pwd: testpassword
