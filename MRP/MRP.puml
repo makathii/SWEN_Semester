@@ -1,45 +1,68 @@
 @startuml
-package Models{
-    class User{
-        id
-        name
-        pwd
-        created_at
-    }
-    class Rating{
-        id
-        media_id
-        user_id
-        stars
-        comment
-        confirmed
-        timestamp
-    }
-    class Media{
-        id
-        type
-        title
-        description
-        release_year
-        genre[]
-        age_restriction
-        creator_id
-    }
+title Media Ratings Platform
+
+package "Presentation" {
+  [UserHandler\n---\nhandleRegister()\nhandleLogin()\nhandleUserProfile()\nhandleUserRatings()\nhandleUserFavorites()] as UserHandler
+
+  [MediaHandler\n---\nhandleGetAllMedia()\nhandleGetMedia()\nhandleCreateMedia()\nhandleUpdateMedia()\nhandleDeleteMedia()\nhandleSearchMedia()\nhandleRateMedia()\nhandleFavoriteMedia()] as MediaHandler
+
+  [RatingHandler\n---\nhandleLikeRating()\nhandleUpdateRating()\nhandleConfirmRating()] as RatingHandler
 }
 
-package util{
-    class PasswordHasher{
-        hashPassword()
-        checkUserPwd()
-    }
-    class DatabaseConnection{
+package "Application" {
+  [UserService\n---\nregisterUser()\nloginUser()\ngetUserProfile()\ngetUserRatings()\ngetUserFavorites()] as UserService
 
-    }
+  [MediaService\n---\ngetAllMedia()\ngetMediaById()\ncreateMedia()\nupdateMedia()\ndeleteMedia()\nsearchMedia()\ngetMediaByCreator()] as MediaService
+
+  [RatingService\n---\ncreateRating()\nupdateRating()\nlikeRating()\nconfirmRating()\ngetRatingById()] as RatingService
 }
 
+package "Domain" {
+  [User\n---\nid\nusername\npasswordHash\ncreatedAt] as User
 
-User - Media
-User - Rating
-Media - Rating
-User - PasswordHasher
+  [Media\n---\nid\ntype\ntitle\ndescription\nrelease_year\nage_restriction\ncreator_id\ngenres] as Media
+
+  [Rating\n---\nid\nmedia_id\nuser_id\nstars\ncomment\nconfirmed\ncreated_at] as Rating
+}
+
+package "Infrastructure" {
+  [UserRepository\n---\nsave()\ngetById()\ngetByUsername()\ngetByName()\ndeleteById()] as UserRepository
+
+  [MediaRepository\n---\nsave()\ngetById()\ngetByName()\ngetAllMedia()\ndeleteById()\nsaveGenres()\ngetOrCreateGenreId()\ngetCurrentGenreIds()] as MediaRepository
+
+  [TokenRepository\n---\ncreateToken()\ngetUserIdFromToken()\ndeleteToken()] as TokenRepository
+}
+
+database "database" {
+  [favorites\n---\nuser_id\nmedia_id]
+  [genres\n---\ngenre_id\nname]
+  [media\n---\nid\ntype\ntitle\ndescription\nrelease_year\nage_restriction\ncreator_id]
+  [media_genres\n---\nmedia_id\ngenre_id]
+  [rating_likes\n---\nrating_id\nuser_id]
+  [ratings\n---\nid\nmedia_id\nuser_id\nstars\ncomment\nconfirmed\ncreated_at]
+  [tokens\n---\ntoken\nuser_id]
+  [users\n---\nid\nusername\npassword_hash\ncreated_at]
+}
+
+' flow arrows
+UserHandler --> UserService
+MediaHandler --> MediaService
+RatingHandler --> RatingService
+
+UserService --> UserRepository
+MediaService --> MediaRepository
+UserService --> TokenRepository
+
+UserRepository --> users
+MediaRepository --> media
+MediaRepository --> genres
+MediaRepository --> media_genres
+TokenRepository --> tokens
+RatingService --> ratings
+RatingService --> rating_likes
+UserService --> favorites
+
+UserService --> User
+MediaService --> Media
+RatingService --> Rating
 @enduml
