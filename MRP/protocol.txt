@@ -1,0 +1,147 @@
+Media Ratings Platform - Development Report
+===========================================
+
+PROJECT OVERVIEW
+================
+A RESTful Media Ratings Platform built with Java and PostgreSQL, following
+clean architecture principles and SOLID design patterns.
+
+TECHNICAL STACK
+===============
+- Backend: Java 11
+- Database: PostgreSQL 15 (Docker)
+- Build Tool: Maven
+- Architecture: Layered (Presentation-Application-Domain-Infrastructure)
+- Authentication: Token-based with custom TokenManager
+
+ARCHITECTURE DECISIONS
+======================
+
+1. LAYERED ARCHITECTURE
+-----------------------
+Presentation Layer: HTTP handlers (UserHandler, MediaHandler, RatingHandler)
+Application Layer: Business services (UserService, MediaService)
+Domain Layer: Entities and repository interfaces
+Infrastructure Layer: Database implementations and utilities
+
+2. REPOSITORY PATTERN
+---------------------
+Implemented generic IRepository<T> interface with:
+- MediaRepository: Handles complex media-genre relationships
+- UserRepository: User management with password hashing
+- TokenRepository: Authentication token management
+
+3. CUSTOM AUTHENTICATION
+------------------------
+- Simple token-based authentication using TokenManager
+- Tokens stored in memory: username + "-mrpToken"
+- AuthHelper utility for request authentication
+
+4. AUTOMATIC GENRE SYSTEM
+-------------------------
+MediaRepository automatically:
+- Creates new genres when they don't exist
+- Manages many-to-many media-genre relationships
+- Handles genre updates during media operations
+
+5. SEARCH & FILTERING
+---------------------
+MediaService provides in-memory filtering for:
+- Title (partial match)
+- Genre (exact match)
+- Media type, release year, age restriction
+- Multiple sorting options
+
+IMPLEMENTATION DETAILS
+======================
+
+DATABASE SCHEMA DESIGN
+----------------------
+- Normalized design with users, media, ratings, genres
+- Junction tables for many-to-many relationships
+- Foreign key constraints with CASCADE delete
+- Check constraints for data integrity
+
+MEDIA MANAGEMENT
+----------------
+- Full CRUD operations with ownership validation
+- Creator can only update/delete their own media
+- Automatic genre creation and linking
+- Comprehensive error handling
+
+AUTHENTICATION FLOW
+-------------------
+1. User registers → password hashed with BCrypt
+2. User logs in → token generated and returned
+3. Token used in Authorization header for protected endpoints
+4. AuthHelper validates tokens on each request
+
+ERROR HANDLING
+--------------
+- Comprehensive error responses with appropriate HTTP status codes
+- Input validation for all endpoints
+- SQL exception handling with meaningful messages
+- JSON parsing error handling
+
+CHALLENGES & SOLUTIONS
+======================
+
+1. LOMBOK COMPILATION ISSUES
+----------------------------
+Problem: Lombok annotations caused compilation errors in different environments
+Solution: Provided multiple build strategies and clear documentation
+
+2. DOCKER SETUP FOR BEGINNERS
+-----------------------------
+Problem: Complex Docker setup for inexperienced users
+Solution: Created one-command setup script with comprehensive error checking
+
+3. GENRE MANAGEMENT
+-------------------
+Problem: Complex many-to-many relationships with automatic creation
+Solution: Implemented getOrCreateGenreId() method in MediaRepository
+
+4. SEARCH FUNCTIONALITY
+-----------------------
+Problem: Complex database queries for multiple filter criteria
+Solution: Implemented in-memory filtering for simplicity and performance
+
+TESTING STRATEGY
+================
+- Manual testing with Postman collection
+- Database integration testing with sample data
+- Error scenario testing (invalid inputs, authentication failures)
+- Edge case testing (empty results, boundary values)
+
+CODE QUALITY
+============
+- Follows Java naming conventions
+- Comprehensive error handling
+- Clear separation of concerns
+- Consistent code style
+- Meaningful variable names
+
+FUTURE ENHANCEMENTS
+===================
+1. Implement rating system with confirmation workflow
+2. Add favorite management functionality
+3. Create recommendation algorithms
+4. Add pagination for large result sets
+5. Implement caching for better performance
+
+DEPLOYMENT
+==========
+The application is designed for easy deployment:
+1. Single-command database setup with Docker
+2. Standard Maven build process
+3. Environment-agnostic configuration
+
+CONCLUSION
+==========
+The Media Ratings Platform demonstrates:
+- Clean architecture implementation
+- RESTful API design
+- Database integration with complex relationships
+- Authentication and authorization
+- Comprehensive error handling
+- User-friendly setup process

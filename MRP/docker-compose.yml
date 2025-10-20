@@ -15,4 +15,4 @@ services:
 volumes:
   postgres_data:
 
-#docker-compose up -d
+#docker compose up -d

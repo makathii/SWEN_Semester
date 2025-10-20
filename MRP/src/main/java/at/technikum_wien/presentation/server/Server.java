@@ -41,12 +41,40 @@ public class Server {
         server.start();
         System.out.println("Server started successfully!");
         System.out.println("Available endpoints:");
+        System.out.println("=== AUTHENTICATION (IMPLEMENTED) ===");
         System.out.println("  POST /api/users/register - Register user");
         System.out.println("  POST /api/users/login - Login user");
+
+        System.out.println("=== MEDIA MANAGEMENT (IMPLEMENTED) ===");
         System.out.println("  GET  /api/media - Get all media");
-        System.out.println("  POST /api/media - Create media");
+        System.out.println("  POST /api/media - Create media (requires auth)");
         System.out.println("  GET  /api/media/{id} - Get media by ID");
-        System.out.println("  PUT  /api/media/{id} - Update media");
-        System.out.println("---------------------------------------------------");
+        System.out.println("  PUT  /api/media/{id} - Update media (creator only)");
+        System.out.println("  DELETE /api/media/{id} - Delete media (creator only)");
+
+        System.out.println("=== MEDIA SEARCH/FILTER (IMPLEMENTED) ===");
+        System.out.println("  GET  /api/media?title=inception&genre=sci-fi - Search media");
+
+        /*
+        System.out.println("=== USER MANAGEMENT (PARTIAL) ===");
+        System.out.println("  GET  /api/users/{id}/profile - TODO (returns 501)");
+        System.out.println("  PUT  /api/users/{id}/profile - TODO (returns 501)");
+        System.out.println("  GET  /api/users/{id}/ratings - TODO (returns 501)");
+        System.out.println("  GET  /api/users/{id}/favorites - TODO (returns 501)");
+        System.out.println("  GET  /api/users/{id}/recommendations - TODO (returns 501)");
+
+        System.out.println("=== RATING SYSTEM (TODO) ===");
+        System.out.println("  POST /api/media/{id}/rate - TODO (returns 501)");
+        System.out.println("  PUT  /api/ratings/{id} - TODO (returns 501)");
+        System.out.println("  POST /api/ratings/{id}/like - TODO (returns 501)");
+        System.out.println("  POST /api/ratings/{id}/confirm - TODO (returns 501)");
+        System.out.println("=== FAVORITES (TODO) ===");
+
+        System.out.println("  POST /api/media/{id}/favorite - TODO (returns 501)");
+        System.out.println("  DELETE /api/media/{id}/favorite - TODO (returns 501)");
+        System.out.println("=== LEADERBOARD (TODO) ===");
+
+        System.out.println("  GET  /api/leaderboard - TODO (returns 501)");
+         */
     }
 }
