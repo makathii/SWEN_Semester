@@ -1,18 +1,13 @@
 Media Ratings Platform - Development Report
 ===========================================
 
-PROJECT OVERVIEW
-================
-A RESTful Media Ratings Platform built with Java and PostgreSQL, following
-clean architecture principles and SOLID design patterns.
-
 TECHNICAL STACK
 ===============
 - Backend: Java 11
 - Database: PostgreSQL 15 (Docker)
 - Build Tool: Maven
 - Architecture: Layered (Presentation-Application-Domain-Infrastructure)
-- Authentication: Token-based with custom TokenManager
+- Authentication: Token-based
 
 ARCHITECTURE DECISIONS
 ======================
@@ -33,7 +28,7 @@ Implemented generic IRepository<T> interface with:
 
 3. CUSTOM AUTHENTICATION
 ------------------------
-- Simple token-based authentication using TokenManager
+- Simple token-based authentication
 - Tokens stored in memory: username + "-mrpToken"
 - AuthHelper utility for request authentication
 
@@ -64,7 +59,7 @@ DATABASE SCHEMA DESIGN
 
 MEDIA MANAGEMENT
 ----------------
-- Full CRUD operations with ownership validation
+- CRUD operations with ownership validation
 - Creator can only update/delete their own media
 - Automatic genre creation and linking
 - Comprehensive error handling
@@ -78,7 +73,7 @@ AUTHENTICATION FLOW
 
 ERROR HANDLING
 --------------
-- Comprehensive error responses with appropriate HTTP status codes
+- error responses with HTTP status codes
 - Input validation for all endpoints
 - SQL exception handling with meaningful messages
 - JSON parsing error handling
@@ -89,12 +84,12 @@ CHALLENGES & SOLUTIONS
 1. LOMBOK COMPILATION ISSUES
 ----------------------------
 Problem: Lombok annotations caused compilation errors in different environments
-Solution: Provided multiple build strategies and clear documentation
+Solution: Provided different build strategy
 
 2. DOCKER SETUP FOR BEGINNERS
 -----------------------------
 Problem: Complex Docker setup for inexperienced users
-Solution: Created one-command setup script with comprehensive error checking
+Solution: Created one-command setup script
 
 3. GENRE MANAGEMENT
 -------------------
@@ -112,14 +107,6 @@ TESTING STRATEGY
 - Database integration testing with sample data
 - Error scenario testing (invalid inputs, authentication failures)
 - Edge case testing (empty results, boundary values)
-
-CODE QUALITY
-============
-- Follows Java naming conventions
-- Comprehensive error handling
-- Clear separation of concerns
-- Consistent code style
-- Meaningful variable names
 
 FUTURE ENHANCEMENTS
 ===================

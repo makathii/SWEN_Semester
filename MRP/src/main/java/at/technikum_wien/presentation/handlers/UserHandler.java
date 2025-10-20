@@ -1,4 +1,4 @@
-package at.technikum_wien.infrastructure.handlers;
+package at.technikum_wien.presentation.handlers;
 
 import at.technikum_wien.application.services.UserService;
 import at.technikum_wien.infrastructure.util.JsonUtil;

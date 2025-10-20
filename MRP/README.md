@@ -46,20 +46,20 @@ GET /api/media?title=inception&genre=sci-fi&mediaType=movie&releaseYear=2010
 ## SAMPLE DATA
 
 **Users**
-- `alice_wonderland` (token: `alice_wonderland-mrpToken`)
-- `bob_builder` (token: `bob_builder-mrpToken`)
+- `Maria` (token: `Maria-mrpToken`)
+- `Parker` (token: `Parker-mrpToken`)
 
 **Media**
-- *Inception* (movie) - Sci-Fi / Action / Thriller  
-- *The Witcher 3* (game) - Fantasy / Adventure  
-- *Stranger Things* (series) - Sci-Fi / Horror / Drama  
+- *Ready Player One* (movie) - Sci-Fi / Action / Thriller  
+- *GRIS* (game) - Fantasy / Adventure  
+- *Disjointed* (series) - Sci-Fi / Horror / Drama  
 
 ---
 
 ## ARCHITECTURE
 
 **Presentation Layer**
-- `UserHandler`, `MediaHandler`, `RatingHandler`
+- `UserHandler`, `MediaHandler`, `RatingHandler`, `Server`
 
 **Application Layer**
 - `UserService`, `MediaService`, `RatingService`
@@ -68,15 +68,14 @@ GET /api/media?title=inception&genre=sci-fi&mediaType=movie&releaseYear=2010
 - `User`, `Media`, `Rating` entities
 
 **Infrastructure Layer**
-- Database repositories, utilities
+- Database repositories, utilities, security
 
 ---
 
 ## DATABASE SCHEMA
 Tables:
 - `users`, `media`, `ratings`, `genres`, `media_genres`  
-- `favorites`, `rating_likes`, `tokens`  
-- Automatic genre creation system
+- `favorites`, `rating_likes`, `tokens` 
 
 ---
 
@@ -106,8 +105,4 @@ Use provided Postman collection from moodle: **MRP_Postman_Collection.json**
 ## TROUBLESHOOTING
 - Ensure **Docker Desktop** is running before setup  
 - Ports **5432 (DB)** and **8080 (API)** should be available  
-- Run `bash cleanup.sh` to reset everything  
-
----
-
-This project demonstrates a complete REST API with database integration, proper authentication, and a clean layered architecture.
+- Run `bash cleanup.sh` to reset everything

@@ -1,4 +1,4 @@
-package at.technikum_wien.infrastructure.handlers;
+package at.technikum_wien.presentation.handlers;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;

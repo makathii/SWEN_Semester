@@ -2,10 +2,13 @@ package at.technikum_wien.presentation.server;
 
 import at.technikum_wien.application.services.MediaService;
 import at.technikum_wien.application.services.UserService;
-import at.technikum_wien.infrastructure.handlers.*;
 import at.technikum_wien.infrastructure.repositories.MediaRepository;
 import at.technikum_wien.infrastructure.repositories.TokenRepository;
 import at.technikum_wien.infrastructure.repositories.UserRepository;
+import at.technikum_wien.presentation.handlers.LeaderboardHandler;
+import at.technikum_wien.presentation.handlers.MediaHandler;
+import at.technikum_wien.presentation.handlers.RatingHandler;
+import at.technikum_wien.presentation.handlers.UserHandler;
 import com.sun.net.httpserver.HttpServer;
 
 import java.io.IOException;

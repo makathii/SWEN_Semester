@@ -1,11 +1,7 @@
 User1:
 username: testuser
-password: testpassword
+password: password_123
 
-User8:
+User2:
 username: RegisterUser
-password: testpassword
-
-User9:
-username: NewUser
-password: testpwd
+password: $2a$10$sK4.7c9dMeQ0gF3xY9zA.fR2U8lS6nO0qC3wD9yX4aE5zW7cB8oN
