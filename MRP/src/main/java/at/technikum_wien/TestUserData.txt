@@ -1,7 +1,7 @@
 TestUser1:
 username: testuser
-pwd: testpwd
+pwd: testpassword
 
-TestUser2:
+TestUser8:
 username: RegisterUser
 pwd: testpassword
