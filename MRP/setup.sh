@@ -1,8 +1,8 @@
 echo "Media Ratings Platform - Setup"
 
 #start database
-docker compose down > /dev/null 2>&1
-docker compose up -d
+docker-compose down > /dev/null 2>&1
+docker-compose up -d
 
 #wait for database
 until docker exec mrp-postgres pg_isready -U mrp_user -d mrp_db > /dev/null 2>&1; do
