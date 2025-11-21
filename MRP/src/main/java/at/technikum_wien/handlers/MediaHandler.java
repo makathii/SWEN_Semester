@@ -1,10 +1,13 @@
 package at.technikum_wien.handlers;
 
+import at.technikum_wien.database.repositories.FavoriteRepository;
+import at.technikum_wien.services.FavoriteService;
 import at.technikum_wien.services.MediaService;
 import at.technikum_wien.models.entities.Media;
 import at.technikum_wien.security.AuthHelper;
 import at.technikum_wien.handlers.util.JsonUtil;
 import at.technikum_wien.services.RatingService;
+import at.technikum_wien.services.UserService;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
@@ -19,10 +22,12 @@ import java.util.stream.Collectors;
 public class MediaHandler implements HttpHandler {
     private final MediaService mediaService;
     private final RatingService ratingService;
+    private final FavoriteService favoriteService;
 
-    public MediaHandler(MediaService mediaService, RatingService ratingService) {
+    public MediaHandler(MediaService mediaService, RatingService ratingService, FavoriteService favoriteService) {
         this.mediaService = mediaService;
         this.ratingService = ratingService;
+        this.favoriteService = favoriteService;
     }
 
     @Override
@@ -321,7 +326,39 @@ public class MediaHandler implements HttpHandler {
     }
 
     private void handleFavoriteMedia(HttpExchange exchange, String method, String path) throws IOException {
-        //TODO
+        try{
+            int mediaId = extractIdFromPath(path);
+
+            Integer userId = AuthHelper.getUserIdFromAuthHeader(exchange);
+            if(userId == null) {
+                sendResponse(exchange,401,"{\"error\": \"Authentication required\"}");
+                return;
+            }
+
+            if("POST".equals(method)) {
+                boolean success = favoriteService.addFavorite(userId,mediaId);
+                if(success) {
+                    sendResponse(exchange,200,"{\"message\": \"Media added to favorites successfully\"}");
+                }else{
+                    sendResponse(exchange,400,"{\"error\": \"Failed to add media to favorites\"}");
+                }
+            }else if("DELETE".equals(method)) {
+                boolean success = favoriteService.removeFavorite(userId,mediaId);
+                if(success) {
+                    sendResponse(exchange,200,"{\"message\": \"Media removed from favorites successfully\"}");
+                }else{
+                    sendResponse(exchange,400,"{\"error\": \"Failed to remove media from favorites\"}");
+                }
+            }else{
+                sendResponse(exchange,405,"{\"error\": \"Method not allowed\"}");
+            }
+        }catch (IllegalArgumentException e){
+            sendResponse(exchange,404,"{\"error\": \"" + e.getMessage() + "\"}");
+        }catch (IllegalStateException e){
+            sendResponse(exchange,409,"{\"error\": \"" + e.getMessage() + "\"}");
+        } catch (Exception e) {
+            sendResponse(exchange, 500, "{\"error\": \"Internal server error: " + e.getMessage() + "\"}");
+        }
     }
 
     private int extractIdFromPath(String path) {

@@ -1,7 +1,9 @@
 package at.technikum_wien.handlers;
 
+import at.technikum_wien.models.entities.Media;
 import at.technikum_wien.models.entities.User;
 import at.technikum_wien.security.AuthHelper;
+import at.technikum_wien.services.FavoriteService;
 import at.technikum_wien.services.UserService;
 import at.technikum_wien.services.RatingService;
 import at.technikum_wien.services.MediaService;
@@ -12,6 +14,7 @@ import com.sun.net.httpserver.HttpHandler;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -20,12 +23,14 @@ public class UserHandler implements HttpHandler {
     private final UserService userService;
     private final RatingService ratingService;
     private final MediaService mediaService;
+    private final FavoriteService favoriteService;
     private final Pattern userIdPattern = Pattern.compile("/api/users/(\\d+)");
 
-    public UserHandler(UserService userService, RatingService ratingService, MediaService mediaService) {
+    public UserHandler(UserService userService, RatingService ratingService, MediaService mediaService, FavoriteService favoriteService) {
         this.userService = userService;
         this.ratingService = ratingService;
         this.mediaService = mediaService;
+        this.favoriteService = favoriteService;
     }
 
     @Override
@@ -223,8 +228,22 @@ public class UserHandler implements HttpHandler {
     }
 
     private void handleUserFavorites(HttpExchange exchange, String path) throws IOException {
-        // TODO: Implement favorites functionality
-        sendResponse(exchange, 501, "{\"message\": \"Favorites functionality coming soon\"}");
+        try{
+            int userId = extractIdFromPath(path, userIdPattern);
+
+            Integer requestingUserId = AuthHelper.getUserIdFromAuthHeader(exchange);
+            if (requestingUserId == null || requestingUserId != userId) {
+                sendResponse(exchange,403,"{\"error\": \"Access denied\"}");
+                return;
+            }
+            List<Media> favorites = favoriteService.getUserFavorites(userId);
+            String response = JsonUtil.mediaListToJson(favorites);
+            sendResponse(exchange, 200, response);
+        }catch (IllegalArgumentException e){
+            sendResponse(exchange, 404,"{\"error\": \""+e.getMessage()+"\"}");
+        }catch (Exception e){
+            sendResponse(exchange, 500, "{\"error\": \"Internal server error: " + e.getMessage() + "\"}");
+        }
     }
 
     private void handleUserRecommendations(HttpExchange exchange, String path) throws IOException {
