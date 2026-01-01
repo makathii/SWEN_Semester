@@ -21,7 +21,7 @@ public class RatingService {
         this.userRepository = userRepository;
     }
 
-    // Rate a media entry - comments start as unconfirmed (not publicly visible)
+    // Rate a media entry
     public Rating rateMedia(int mediaId, int userId, int stars, String comment) {
         // Validate input
         if (stars < 1 || stars > 5) {
@@ -46,10 +46,8 @@ public class RatingService {
             throw new IllegalStateException("User has already rated this media. Use update instead.");
         }
 
-        // Create new rating - comments are unconfirmed by default (not publicly visible)
-        // If there's no comment, we set confirmed to true since there's nothing to moderate
         boolean hasComment = comment != null && !comment.trim().isEmpty();
-        boolean confirmed = !hasComment; // Auto-confirm if no comment
+        boolean confirmed = !hasComment;
 
         Rating rating = new Rating(mediaId, userId, stars, comment);
         rating.setConfirmed(confirmed);
@@ -104,10 +102,10 @@ public class RatingService {
             throw new SecurityException("User is not authorized to update this rating");
         }
 
-        // Check if comment changed - if so, it needs reconfirmation
+        //check if comment changed - if so, it needs reconfirmation
         boolean commentChanged = !equals(existingRating.getComment(), comment);
         if (commentChanged) {
-            existingRating.setConfirmed(false); // Comment changed, needs reconfirmation
+            existingRating.setConfirmed(false); //comment changed, needs reconfirmation
         }
 
         // Update rating

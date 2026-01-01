@@ -1,16 +1,24 @@
-CREATE TABLE users
-(
-    id            SERIAL PRIMARY KEY,
-    username      VARCHAR(50) UNIQUE NOT NULL,
-    password_hash VARCHAR(255)       NOT NULL,
-    created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
 CREATE TABLE genres
 (
     genre_id SERIAL PRIMARY KEY,
     name     VARCHAR(50) UNIQUE NOT NULL
 );
+
+CREATE TABLE users
+(
+    id             SERIAL PRIMARY KEY,
+    username       VARCHAR(50) UNIQUE NOT NULL,
+    password_hash  VARCHAR(255)       NOT NULL,
+    favorite_genre INT REFERENCES genres (genre_id) DEFAULT NULL,
+    created_at     TIMESTAMP                  DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE user_statistics
+(
+    user_id         INT REFERENCES users (id),
+    activity_points INT DEFAULT 0
+);
+
 
 CREATE TABLE media
 (
@@ -200,5 +208,4 @@ VALUES
     ('Mini-Series'),
     ('Sitcom'),
     ('Soap Opera')
-
-ON CONFLICT (name) DO NOTHING;
+    ON CONFLICT (name) DO NOTHING;

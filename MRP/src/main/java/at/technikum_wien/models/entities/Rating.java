@@ -17,6 +17,8 @@ public class Rating {
     private Boolean confirmed;
     private LocalDateTime created_at;
 
+    public Rating(){}
+
     public Rating(int id,int media_id, int user_id, int stars, String comment, Boolean confirmed, LocalDateTime created_at) {
         this.id = id;
         this.media_id = media_id;

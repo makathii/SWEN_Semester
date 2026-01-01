@@ -3,10 +3,7 @@ package at.technikum_wien.handlers;
 import at.technikum_wien.models.entities.Media;
 import at.technikum_wien.models.entities.User;
 import at.technikum_wien.security.AuthHelper;
-import at.technikum_wien.services.FavoriteService;
-import at.technikum_wien.services.UserService;
-import at.technikum_wien.services.RatingService;
-import at.technikum_wien.services.MediaService;
+import at.technikum_wien.services.*;
 import at.technikum_wien.handlers.util.JsonUtil;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -14,23 +11,27 @@ import com.sun.net.httpserver.HttpHandler;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class UserHandler implements HttpHandler {
     private final UserService userService;
     private final RatingService ratingService;
     private final MediaService mediaService;
+    private final RecommendationService recommendationService;
     private final FavoriteService favoriteService;
     private final Pattern userIdPattern = Pattern.compile("/api/users/(\\d+)");
 
-    public UserHandler(UserService userService, RatingService ratingService, MediaService mediaService, FavoriteService favoriteService) {
+    public UserHandler(UserService userService, RatingService ratingService, MediaService mediaService, FavoriteService favoriteService, RecommendationService recommendationService) {
         this.userService = userService;
         this.ratingService = ratingService;
         this.mediaService = mediaService;
         this.favoriteService = favoriteService;
+        this.recommendationService = recommendationService;
     }
 
     @Override
@@ -128,7 +129,6 @@ public class UserHandler implements HttpHandler {
 
     private void handleGetUserProfile(HttpExchange exchange, int userId) throws IOException {
         try {
-            // Verify the requesting user has access to this profile
             Integer requestingUserId = AuthHelper.getUserIdFromAuthHeader(exchange);
             if (requestingUserId == null || requestingUserId != userId) {
                 sendResponse(exchange, 403, "{\"error\": \"Access denied\"}");
@@ -149,11 +149,9 @@ public class UserHandler implements HttpHandler {
             int totalRatings = ratings.size();
             double averageRating = ratings.stream().mapToInt(r -> r.getStars()).average().orElse(0.0);
 
-            // Simple favorite genre calculation (you can enhance this)
             String favoriteGenre = "None";
             if (!ratings.isEmpty()) {
-                // This would need genre data from media - you'd need to enhance this
-                favoriteGenre = "Action"; // Placeholder
+                favoriteGenre = "Action"; //Placeholder
             }
 
             String response = String.format("{\"user\": {\"id\": %d, \"username\": \"%s\", \"createdAt\": \"%s\"}, " + "\"statistics\": {\"totalRatings\": %d, \"averageRating\": %.2f, \"mediaCreated\": %d, \"favoriteGenre\": \"%s\"}}", user.getId(), user.getUsername(), user.getCreatedAt(), totalRatings, averageRating, createdMedia.size(), favoriteGenre);
@@ -167,7 +165,6 @@ public class UserHandler implements HttpHandler {
 
     private void handleUpdateUserProfile(HttpExchange exchange, int userId, String requestBody) throws IOException {
         try {
-            // Verify the requesting user has access to update this profile
             Integer requestingUserId = AuthHelper.getUserIdFromAuthHeader(exchange);
             if (requestingUserId == null || requestingUserId != userId) {
                 sendResponse(exchange, 403, "{\"error\": \"Access denied\"}");
@@ -191,7 +188,7 @@ public class UserHandler implements HttpHandler {
 
             // Update password if provided
             if (newPassword != null && !newPassword.trim().isEmpty()) {
-                user.setPasswordHash(newPassword); // This should be hashed in the service
+                user.setPasswordHash(newPassword);
             }
 
             User updatedUser = userService.updateUser(user);
@@ -211,7 +208,6 @@ public class UserHandler implements HttpHandler {
         try {
             int userId = extractIdFromPath(path, userIdPattern);
 
-            // Verify the requesting user has access
             Integer requestingUserId = AuthHelper.getUserIdFromAuthHeader(exchange);
             if (requestingUserId == null || requestingUserId != userId) {
                 sendResponse(exchange, 403, "{\"error\": \"Access denied\"}");
@@ -247,8 +243,52 @@ public class UserHandler implements HttpHandler {
     }
 
     private void handleUserRecommendations(HttpExchange exchange, String path) throws IOException {
-        // TODO: Implement recommendations
-        sendResponse(exchange, 501, "{\"message\": \"Recommendations functionality coming soon\"}");
+        try {
+            int userId = extractIdFromPath(path, userIdPattern);
+
+            // Verify the requesting user has access
+            Integer requestingUserId = AuthHelper.getUserIdFromAuthHeader(exchange);
+            if (requestingUserId == null || requestingUserId != userId) {
+                sendResponse(exchange, 403, "{\"error\": \"Access denied\"}");
+                return;
+            }
+
+            String query = exchange.getRequestURI().getQuery();
+            Map<String, String> queryParams = parseQueryString(query != null ? query : "");
+
+            String type = queryParams.getOrDefault("type", "genre");
+            int limit = Integer.parseInt(queryParams.getOrDefault("limit", "10"));
+
+            List<Media> recommendations;
+
+            switch (type.toLowerCase()) {
+                case "content":
+                    recommendations = recommendationService.getContentBasedRecommendations(userId, limit);
+                    break;
+                case "genre":
+                default:
+                    recommendations = recommendationService.getGenreBasedRecommendations(userId, limit);
+                    break;
+            }
+
+            String response = JsonUtil.mediaListToJson(recommendations);
+
+            // Add recommendation metadata to response
+            String enhancedResponse = String.format(
+                    "{\"recommendations\": %s, \"type\": \"%s\", \"userId\": %d, \"count\": %d}",
+                    response, type, userId, recommendations.size()
+            );
+
+            sendResponse(exchange, 200, enhancedResponse);
+
+        } catch (NumberFormatException e) {
+            sendResponse(exchange, 400, "{\"error\": \"Invalid number format in query parameters\"}");
+        } catch (IllegalArgumentException e) {
+            sendResponse(exchange, 404, "{\"error\": \"" + e.getMessage() + "\"}");
+        } catch (Exception e) {
+            e.printStackTrace();
+            sendResponse(exchange, 500, "{\"error\": \"Internal server error: " + e.getMessage() + "\"}");
+        }
     }
 
     private void handleLeaderboard(HttpExchange exchange) throws IOException {
@@ -275,5 +315,14 @@ public class UserHandler implements HttpHandler {
         try (OutputStream os = exchange.getResponseBody()) {
             os.write(response.getBytes());
         }
+    }
+
+    private Map<String, String> parseQueryString(String query) {
+        return Arrays.stream(query.split("&"))
+                .map(param -> param.split("="))
+                .collect(Collectors.toMap(
+                        pair -> pair[0],
+                        pair -> pair.length > 1 ? pair[1] : ""
+                ));
     }
 }

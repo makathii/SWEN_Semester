@@ -39,4 +39,6 @@ public class Media {
         this.creator_id = creator_id;
         this.genres = genres;
     }
+
+    public Media() {}
 }

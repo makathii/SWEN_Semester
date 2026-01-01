@@ -238,7 +238,7 @@ public class RatingHandler implements HttpHandler {
     private void handleDeleteRating(HttpExchange exchange, int ratingId) throws IOException {
         //extract user ID from query parameters
         String query = exchange.getRequestURI().getQuery();
-        int userId = extractUserIdFromQuery(query);
+        Integer userId = AuthHelper.getUserIdFromAuthHeader(exchange);
 
         if (userId == 0) {
             sendResponse(exchange, 400, "{\"error\": \"User ID is required\"}");
@@ -286,18 +286,6 @@ public class RatingHandler implements HttpHandler {
             return Integer.parseInt(matcher.group(1));
         }
         throw new IllegalArgumentException("Invalid path format");
-    }
-
-    private int extractUserIdFromQuery(String query) {
-        if (query != null && query.contains("user_id=")) {
-            String[] params = query.split("&");
-            for (String param : params) {
-                if (param.startsWith("user_id=")) {
-                    return Integer.parseInt(param.substring(8));
-                }
-            }
-        }
-        return 0;
     }
 
     private Map<String, Object> parseRequestBody(String requestBody) throws IOException {

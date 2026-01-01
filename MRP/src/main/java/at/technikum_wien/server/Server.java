@@ -2,10 +2,7 @@ package at.technikum_wien.server;
 
 import at.technikum_wien.database.repositories.*;
 import at.technikum_wien.handlers.*;
-import at.technikum_wien.services.FavoriteService;
-import at.technikum_wien.services.MediaService;
-import at.technikum_wien.services.RatingService;
-import at.technikum_wien.services.UserService;
+import at.technikum_wien.services.*;
 import com.sun.net.httpserver.HttpServer;
 
 import java.io.IOException;
@@ -25,9 +22,10 @@ public class Server {
         MediaService mediaService = new MediaService(mediaRepository);
         RatingService ratingService = new RatingService(ratingRepository, mediaRepository, userRepository);
         FavoriteService favoriteService = new FavoriteService(favoriteRepository, userRepository, mediaRepository);
+        RecommendationService recommendationService = new RecommendationService(mediaRepository,ratingRepository,favoriteRepository);
 
         //create handlers
-        UserHandler userHandler = new UserHandler(userService,ratingService,mediaService,favoriteService);
+        UserHandler userHandler = new UserHandler(userService,ratingService,mediaService,favoriteService,recommendationService);
         MediaHandler mediaHandler = new MediaHandler(mediaService,ratingService,favoriteService);
         RatingHandler ratingHandler = new RatingHandler(ratingService);
 
@@ -83,4 +81,16 @@ public class Server {
         System.out.println("  DELETE /api/media/{id}/favorite - Remove media from favorites");
         System.out.println("  GET  /api/users/favorites - Get current user's favorites");
     }
+    /*
+        MISSING:
+        all the testies ofc
+        GET Rating History
+        GET Favorites
+        Recommendations dont make sense yet
+        Leaderboard
+        Update User -> apparently we need an email column which I wasnt aware of, nice.
+        also it might be smart to save the favorite genre in the database?
+        test all of the handle stuff deffo
+        meby rethink tokens hehe
+     */
 }
