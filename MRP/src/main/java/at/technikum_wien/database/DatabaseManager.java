@@ -9,9 +9,9 @@ import java.sql.SQLException;
 public enum DatabaseManager {
     INSTANCE;
 
-    private String url = "jdbc:postgresql://localhost:5432/mrp_db";
-    private String user = "mrp_user";
-    private String password = "mrp_pwd";
+    private static String url = "jdbc:postgresql://localhost:5432/mrp_db";
+    private static String user = "mrp_user";
+    private static String password = "mrp_pwd";
 
     public void overrideForTests(String url, String user, String password) {
         this.url = url;
@@ -19,7 +19,7 @@ public enum DatabaseManager {
         this.password = password;
     }
 
-    public Connection getConnection() {
+    public static Connection getConnection() {
         try {
             return DriverManager.getConnection(url, user, password);
         } catch (SQLException e) {

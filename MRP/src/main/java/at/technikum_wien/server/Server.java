@@ -17,6 +17,11 @@ public class Server {
         RatingRepository ratingRepository = new RatingRepository();
         FavoriteRepository favoriteRepository = new FavoriteRepository();
 
+
+        LeaderboardRepository leaderboardRepository = new LeaderboardRepository();
+        LeaderboardService leaderboardService = new LeaderboardService(leaderboardRepository);
+        LeaderboardHandler leaderboardHandler = new LeaderboardHandler(leaderboardService);
+
         //create services
         UserService userService = new UserService(userRepository, tokenRepository);
         MediaService mediaService = new MediaService(mediaRepository);
@@ -37,25 +42,26 @@ public class Server {
         server.createContext("/api/users", userHandler);
         server.createContext("/api/media", mediaHandler);
         server.createContext("/api/ratings", ratingHandler);
+        server.createContext("/api/leaderboard", leaderboardHandler);
 
         server.start();
         System.out.println("Server started successfully!");
         System.out.println("Available endpoints:");
-        System.out.println("=== AUTHENTICATION (IMPLEMENTED) ===");
+        System.out.println("=== AUTHENTICATION ===");
         System.out.println("  POST /api/users/register - Register user");
         System.out.println("  POST /api/users/login - Login user");
 
-        System.out.println("=== MEDIA MANAGEMENT (IMPLEMENTED) ===");
+        System.out.println("=== MEDIA MANAGEMENT ===");
         System.out.println("  GET  /api/media - Get all media");
         System.out.println("  POST /api/media - Create media (requires auth)");
         System.out.println("  GET  /api/media/{id} - Get media by ID");
         System.out.println("  PUT  /api/media/{id} - Update media (creator only)");
         System.out.println("  DELETE /api/media/{id} - Delete media (creator only)");
 
-        System.out.println("=== MEDIA SEARCH/FILTER (IMPLEMENTED) ===");
+        System.out.println("=== MEDIA SEARCH/FILTER ===");
         System.out.println("  GET  /api/media?title=inception&genre=sci-fi - Search media");
 
-        System.out.println("=== RATING SYSTEM (IMPLEMENTED) ===");
+        System.out.println("=== RATING SYSTEM ===");
         System.out.println("  POST /api/media/{id}/rate - Rate media");
         System.out.println("  PUT  /api/ratings/{id} - Update rating");
         System.out.println("  POST /api/ratings/{id}/like - Like rating");
@@ -71,10 +77,11 @@ public class Server {
         System.out.println("  GET  /api/users/{id}/recommendations - Get user recommendations");
 
         System.out.println("=== LEADERBOARD ===");
-        System.out.println("  GET  /api/leaderboard - Get complete leaderboard");
+        System.out.println("  GET  /api/leaderboard - Get complete leaderboard summary");
+        System.out.println("  GET  /api/leaderboard/top-users - Get top users by activity");
         System.out.println("  GET  /api/leaderboard/top-rated - Get top rated media");
         System.out.println("  GET  /api/leaderboard/most-liked - Get most liked ratings");
-        System.out.println("  GET  /api/leaderboard/top-users - Get top users by activity");
+        System.out.println("  GET  /api/leaderboard/trending-genres - Get trending genres");
 
         System.out.println("=== FAVORITES ===");
         System.out.println("  POST /api/media/{id}/favorite - Add media to favorites");
@@ -84,10 +91,7 @@ public class Server {
     /*
         MISSING:
         all the testies ofc
-        GET Rating History
-        GET Favorites
         Recommendations dont make sense yet
-        Leaderboard
         Update User -> apparently we need an email column which I wasnt aware of, nice.
         also it might be smart to save the favorite genre in the database?
         test all of the handle stuff deffo

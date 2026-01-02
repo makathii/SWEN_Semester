@@ -2,6 +2,7 @@ package at.technikum_wien.handlers.util;
 
 import at.technikum_wien.models.entities.Media;
 import at.technikum_wien.models.entities.Rating;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -41,5 +42,15 @@ public class JsonUtil {
         } catch (Exception e) {
             return "[]";
         }
+    }
+
+    public static String objectToJson(Object object) throws JsonProcessingException, JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.writeValueAsString(object);
+    }
+
+    public static String mapToJson(Map<String, Object> map) throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.writeValueAsString(map);
     }
 }
