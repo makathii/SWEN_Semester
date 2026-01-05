@@ -4,6 +4,8 @@ import at.technikum_wien.models.entities.User;
 import at.technikum_wien.database.repositories.UserRepository;
 import at.technikum_wien.database.repositories.TokenRepository;
 import at.technikum_wien.security.PasswordHasher;
+import java.util.List;
+import java.util.Map;
 
 public class UserService {
     private final UserRepository userRepository;
@@ -65,6 +67,11 @@ public class UserService {
             if (userWithNewUsername != null && userWithNewUsername.getId() != user.getId()) {
                 throw new IllegalArgumentException("Username already exists");
             }
+        }
+
+        // If favoriteGenre is not provided in the update, keep the existing one
+        if (user.getFavoriteGenre() == null && existingUser.getFavoriteGenre() != null) {
+            user.setFavoriteGenre(existingUser.getFavoriteGenre());
         }
 
         return userRepository.save(user);

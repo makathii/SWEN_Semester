@@ -57,8 +57,6 @@ public class UserHandler implements HttpHandler {
                 handleUserFavorites(exchange, path);
             } else if (path.matches("/api/users/\\d+/recommendations")) {
                 handleUserRecommendations(exchange, path);
-            } else if (path.equals("/api/users/leaderboard")) {
-                handleLeaderboard(exchange);
             } else {
                 sendResponse(exchange, 404, "{\"error\": \"Not Found\"}");
             }
@@ -163,6 +161,7 @@ public class UserHandler implements HttpHandler {
         }
     }
 
+    // In the handleUpdateUserProfile method, update this section:
     private void handleUpdateUserProfile(HttpExchange exchange, int userId, String requestBody) throws IOException {
         try {
             Integer requestingUserId = AuthHelper.getUserIdFromAuthHeader(exchange);
@@ -173,7 +172,7 @@ public class UserHandler implements HttpHandler {
 
             Map<String, String> updateData = JsonUtil.parseJson(requestBody);
             String newUsername = updateData.get("username");
-            String newPassword = updateData.get("password");
+            String newFavoriteGenre = updateData.get("favoriteGenre");
 
             User user = userService.getUserById(userId);
             if (user == null) {
@@ -186,13 +185,24 @@ public class UserHandler implements HttpHandler {
                 user.setUsername(newUsername);
             }
 
-            // Update password if provided
-            if (newPassword != null && !newPassword.trim().isEmpty()) {
-                user.setPasswordHash(newPassword);
+            // Update favorite genre if provided
+            if (newFavoriteGenre != null) {
+                // Allow empty string to clear favorite genre
+                if (newFavoriteGenre.trim().isEmpty()) {
+                    user.setFavoriteGenre(null);
+                } else {
+                    // Validate that the genre exists
+                    // You can either accept genre_id (as number) or genre name
+                    // The repository will handle both cases
+                    user.setFavoriteGenre(newFavoriteGenre.trim());
+                }
             }
 
             User updatedUser = userService.updateUser(user);
-            String response = String.format("{\"message\": \"Profile updated successfully\", \"userId\": %d}", updatedUser.getId());
+            String response = String.format("{\"message\": \"Profile updated successfully\", \"userId\": %d, \"username\": \"%s\", \"favoriteGenre\": %s}",
+                    updatedUser.getId(),
+                    updatedUser.getUsername(),
+                    updatedUser.getFavoriteGenre() != null ? "\"" + updatedUser.getFavoriteGenre() + "\"" : "null");
             sendResponse(exchange, 200, response);
 
         } catch (IllegalArgumentException e) {
@@ -287,16 +297,6 @@ public class UserHandler implements HttpHandler {
             sendResponse(exchange, 404, "{\"error\": \"" + e.getMessage() + "\"}");
         } catch (Exception e) {
             e.printStackTrace();
-            sendResponse(exchange, 500, "{\"error\": \"Internal server error: " + e.getMessage() + "\"}");
-        }
-    }
-
-    private void handleLeaderboard(HttpExchange exchange) throws IOException {
-        try {
-            // TODO: Implement leaderboard - most active users by rating count
-            // This would require a new repository method to get users sorted by rating count
-            sendResponse(exchange, 501, "{\"message\": \"Leaderboard functionality coming soon\"}");
-        } catch (Exception e) {
             sendResponse(exchange, 500, "{\"error\": \"Internal server error: " + e.getMessage() + "\"}");
         }
     }

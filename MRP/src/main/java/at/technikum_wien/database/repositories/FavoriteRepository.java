@@ -53,7 +53,7 @@ public class FavoriteRepository {
     }
 
     public List<Media> getUserFavorites(int userId) {
-        String sql = "SELECT m.*, array_agg(g.name) as genres " + "FROM favorites f " + "JOIN media m ON f.media_id = m.id " + "LEFT JOIN media_genres mg ON m.id = mg.media_id " + "LEFT JOIN genres g ON mg.genre_id = g.genre_id " + "WHERE f.user_id = ? " + "GROUP BY m.id " + "ORDER BY f.created_at DESC";
+        String sql = "SELECT m.*, array_agg(g.name) as genres " + "FROM favorites f " + "JOIN media m ON f.media_id = m.id " + "LEFT JOIN media_genres mg ON m.id = mg.media_id " + "LEFT JOIN genres g ON mg.genre_id = g.genre_id " + "WHERE f.user_id = ? " + "GROUP BY m.id ";
         try (Connection conn = DatabaseManager.INSTANCE.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, userId);
             return executeMediaQuery(pstmt);
