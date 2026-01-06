@@ -68,7 +68,9 @@ CREATE TABLE tokens
     id         SERIAL PRIMARY KEY,
     token      VARCHAR(255) UNIQUE NOT NULL,
     user_id    INT REFERENCES users (id),
-    created_at TIMESTAMP DEFAULT NOW()
+    created_at TIMESTAMP DEFAULT NOW(),
+    expires_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP + INTERVAL '24 hours',
+    last_used_at TIMESTAMP
 );
 
 INSERT INTO genres (name)
