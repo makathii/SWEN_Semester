@@ -1,6 +1,10 @@
 Media Ratings Platform - Development Report
 ===========================================
 
+GITHUB
+======
+https://github.com/makathii/SWEN_Semester
+
 TECHNICAL STACK
 ===============
 - Backend: Java 11
@@ -14,23 +18,27 @@ ARCHITECTURE DECISIONS
 
 1. LAYERED ARCHITECTURE
 -----------------------
-Presentation Layer: HTTP handlers (UserHandler, MediaHandler, RatingHandler)
-Application Layer: Business services (UserService, MediaService)
+Presentation Layer: HTTP handlers (LeaderboardHandler, UserHandler, MediaHandler, RatingHandler)
+Application Layer: Business services (FavoriteService, LeaderboardService, MediaService, RatingService, RecommendationsService, UserService)
 Domain Layer: Entities and repository interfaces
-Infrastructure Layer: Database implementations and utilities
+Infrastructure Layer: Database implementations and utilities (PostgreSQL based)
 
 2. REPOSITORY PATTERN
 ---------------------
 Implemented generic IRepository<T> interface with:
-- MediaRepository: Handles complex media-genre relationships
-- UserRepository: User management with password hashing
-- TokenRepository: Authentication token management
+- MediaRepository: Full CRUD support, handles many-to-many media-genre relationships, dynamic genre creation
+- UserRepository: User management with password hashing, user statistics
+- RatingRepository: create/update/confirm/delete, rating likes
+- FavoriteRepository: add/remove
+- TokenRepository: Authentication token management including expiry & cleanup
+- LeaderboardRepository: statistics & rankings
 
 3. CUSTOM AUTHENTICATION
 ------------------------
-- Simple token-based authentication
-- Tokens stored in memory: username + "-mrpToken"
-- AuthHelper utility for request authentication
+- token-based authentication with persistent storage
+- stored in tokens tabke
+- each token associated with user, has expiration timestamp (24 hours)
+- existing valid tokens are reused instead of duplicated
 
 4. AUTOMATIC GENRE SYSTEM
 -------------------------
@@ -47,29 +55,51 @@ MediaService provides in-memory filtering for:
 - Media type, release year, age restriction
 - Multiple sorting options
 
+6. FAVORITES & SOCIAL INTERACTIONS
+---------------------
+- Users can mark media as favorites
+- favorites are stored in junction table
+- duplicate favorites are prevented
+
+7. LEADERBOARDS & ANALYTICS
+---------------------
+- Most Active Users -> based on ratings, favorites & created media -> weighted activity score
+- Top Rated Media _> avg. rating, rating count as tie breaker
+- Most Liked Ratings -> only confirmed ratings, ordered by like count & recency
+- Trending Genres -> based on recent ratings (last 7 days)
+
 IMPLEMENTATION DETAILS
 ======================
 
 DATABASE SCHEMA DESIGN
 ----------------------
-- Normalized design with users, media, ratings, genres
+- Normalized design with users, media, ratings, genres, etc
 - Junction tables for many-to-many relationships
 - Foreign key constraints with CASCADE delete
 - Check constraints for data integrity
+- Timestamp tracking for auditing & analytics
 
 MEDIA MANAGEMENT
 ----------------
 - CRUD operations with ownership validation
-- Creator can only update/delete their own media
+- only Creator can update/delete their own media
 - Automatic genre creation and linking
-- Comprehensive error handling
+
+RATING SYSTEM
+----------------
+- Users can rate media with stars & optional comemnts
+- supports confirmation workflow
+- only confirmed Ratings appear in leaderboards/count toward analytics
+- rating can be liked by other users
 
 AUTHENTICATION FLOW
 -------------------
 1. User registers → password hashed with BCrypt
-2. User logs in → token generated and returned
-3. Token used in Authorization header for protected endpoints
-4. AuthHelper validates tokens on each request
+2. User logs in → token generated/reused
+3. Token returned to client
+4. Token sent via Authorization header
+5. Token used for protected endpoints on every request
+6. Expired Tokens cleaned automatically
 
 ERROR HANDLING
 --------------
@@ -81,20 +111,20 @@ ERROR HANDLING
 CHALLENGES & SOLUTIONS
 ======================
 
-1. LOMBOK COMPILATION ISSUES
+1. TOKEN MANAGEMENT
 ----------------------------
-Problem: Lombok annotations caused compilation errors in different environments
-Solution: Provided different build strategy
+Problem: Preventing token duplication and handling expiration
+Solution: Persistent tokens with reuse, expiry checks, and cleanup logic
 
 2. DOCKER SETUP FOR BEGINNERS
 -----------------------------
 Problem: Complex Docker setup for inexperienced users
 Solution: Created one-command setup script
 
-3. GENRE MANAGEMENT
+3. LEADERBOARD QUERIES
 -------------------
-Problem: Complex many-to-many relationships with automatic creation
-Solution: Implemented getOrCreateGenreId() method in MediaRepository
+Problem: Preventing token duplication and handling expiration
+Solution: SQL aggregation with weighted scoring and grouped joins
 
 4. SEARCH FUNCTIONALITY
 -----------------------
@@ -103,18 +133,13 @@ Solution: Implemented in-memory filtering for simplicity and performance
 
 TESTING STRATEGY
 ================
-- Manual testing with Postman collection
+- Manual API testing with Postman collection
 - Database integration testing with sample data
+- Authentication and authorization edge cases
+- Conflict scenarios (duplicate favorites, likes, ratings)
+- Leaderboard correctness validation
 - Error scenario testing (invalid inputs, authentication failures)
 - Edge case testing (empty results, boundary values)
-
-FUTURE ENHANCEMENTS
-===================
-1. Implement rating system with confirmation workflow
-2. Add favorite management functionality
-3. Create recommendation algorithms
-4. Add pagination for large result sets
-5. Implement caching for better performance
 
 DEPLOYMENT
 ==========
@@ -122,6 +147,65 @@ The application is designed for easy deployment:
 1. Single-command database setup with Docker
 2. Standard Maven build process
 3. Environment-agnostic configuration
+
+LESSONS LEARNED
+==========
+- Separation of concerns is crucial: Separating HTTP handling, service logic, domain models, and database persistence made the system easier to test and maintain.
+- Defensive programming prevents errors: Validating user input (like ratings 1–5 stars, ownership checks) prevented common edge-case bugs.
+- Planning data relationships saves time: Defining the database schema and entity relationships upfront reduced complexity in repositories and business logic.
+- Testing early is key: Writing testable services without tight coupling to the HTTP layer simplified unit testing.
+- Recommendations are tricky: Implementing content-based and genre-based recommendations highlighted the importance of carefully weighting factors like genre similarity, media type, and age restrictions.
+- do not use .txt for protocols
+
+TESTING STRATEGY
+==========
+- Test Structure: Each service has a corresponding test class:
+    + UserServiceTest → Registration, login, update user, error conditions
+    + MediaServiceTest → CRUD operations, search, filter
+    + RatingServiceTest → Rate media, update rating, confirm comment, like rating, delete rating
+    + FavoriteServiceTest → Add/remove favorites, get user favorites
+    + RecommendationServiceTest → Genre-based and content-based recommendation logic
+    + LeaderboardServiceTest → Top users, top media, trending genres
+
+- Testing Principles:
+    + Happy path tests: Ensure all operations succeed under normal conditions.
+    + Boundary tests: E.g., rating 1 star vs 5 stars, empty comments, non-existent IDs.
+    + Security/ownership tests: Ensure users cannot modify others’ data.
+    + Mocking dependencies: Services are tested independently of the database using mock repositories.
+
+- Coverage Goals:
+    + Cover all business rules
+    + Include edge cases
+    + Verify error handling and exceptions
+
+SOLID PRINCIPLES IN PRACTICE
+=========
+- Single Responsibility Principle (SRP)
+    + Each service handles only one domain: UserService → user-related operations, RatingService → rating logic.
+    + Repositories handle only data access.
+- Open/Closed Principle (OCP)
+    + Services can be extended with new methods (e.g., additional recommendation algorithms) without modifying existing ones.
+
+- Dependency Inversion Principle (DIP)
+    + Services depend on repository interfaces, not concrete implementations, allowing easy swapping of database backends or mocks for testing.
+
+- Interface Segregation Principle (ISP)
+    + Interfaces are small and focused (e.g., FavoriteRepository only handles favorite-related operations).
+
+- Liskov Substitution Principle (LSP)
+    + Any repository implementation can replace another without breaking service logic.
+
+TIME TRACKING
+=============
+Design & UML: 5h
+Domain & Repository Layer: 10h
+Service Layer: 11h
+Presentation/Handlers: 6h
+Recommendation System: 6h
+Unit Testing: 8h
+Integration & Debugging: 7h
+Documentation & Bonus Stuff: 4h
+Total: 57 -> this is a total estimate, I was not aware we were supposed to track our time
 
 CONCLUSION
 ==========

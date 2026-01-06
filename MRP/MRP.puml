@@ -1,102 +1,204 @@
 @startuml
-title Media Ratings Platform
+title Media Ratings Platform – Full Layered Architecture
 
-package "Presentation" {
-  [UserHandler\n---\nhandleRegister()\nhandleLogin()\nhandleUserProfile()\nhandleUserRatings()\nhandleUserFavorites()\nhandleUserStatistics()] as UserHandler
+package "Presentation Layer" {
 
-  [MediaHandler\n---\nhandleGetAllMedia()\nhandleGetMedia()\nhandleCreateMedia()\nhandleUpdateMedia()\nhandleDeleteMedia()\nhandleSearchMedia()\nhandleRateMedia()\nhandleFavoriteMedia()] as MediaHandler
+  class UserHandler {
+    handleRegister()
+    handleLogin()
+    handleUserProfile()
+    handleUserFavorites()
+    handleRecommendations()
+  }
 
-  [RatingHandler\n---\nhandleLikeRating()\nhandleUpdateRating()\nhandleConfirmRating()] as RatingHandler
+  class MediaHandler {
+    handleGetAllMedia()
+    handleGetMedia()
+    handleCreateMedia()
+    handleUpdateMedia()
+    handleDeleteMedia()
+    handleSearchMedia()
+  }
+
+  class RatingHandler {
+    handleRateMedia()
+    handleUpdateRating()
+    handleConfirmRating()
+    handleDeleteRating()
+    handleLikeRating()
+    handleGetRating()
+  }
+
+  class LeaderboardHandler {
+  handleMostActiveUsers()
+  handleTopRatedMedia()
+  handleMostLikedRatings()
+  handleTrendingGenres()
+  }
 }
 
-package "Application" {
-  [UserService\n---\nregisterUser()\nloginUser()\ngetUserProfile()\ngetUserRatings()\ngetUserFavorites()\ngetUserStatistics()\nupdateUserProfile()] as UserService
+package "Application / Service Layer" {
 
-  [MediaService\n---\ngetAllMedia()\ngetMediaById()\ncreateMedia()\nupdateMedia()\ndeleteMedia()\nsearchMedia()\ngetMediaByCreator()] as MediaService
+  class UserService {
+  registerUser()
+  loginUser()
+  updateUser()
+  getUserById()
+  }
 
-  [RatingService\n---\ncreateRating()\nupdateRating()\nlikeRating()\nconfirmRating()\ngetRatingById()] as RatingService
+  class MediaService{
+  getAllMedia()
+  getMediaById()
+  createMedia()
+  updateMedia()
+  deleteMedia()
+  searchMedia()
+  getMediaByCreator()
+  }
+
+  class FavoriteService {
+  addFavorite()
+  removeFavorite()
+  getUserFavorites()
+  }
+
+  class RatingService {
+  rateMedia()
+  getPublicRating()
+  getRatingsByUser()
+  updateRating()
+  confirmRating()
+  deleteRating()
+  likeRating()
+  getRatingLikeCount()
+  getRatingById()
+  }
+
+  class RecommendationService {
+  getGenreBasedRecommendations()
+  getContentBasedRecommendations()
+  }
+
+  class LeaderboardService {
+  getMostActiveUsers()
+  getTopRatedMedia()
+  getMostLikedRatings()
+  getTrendingGenres()
+  }
 }
 
-package "Domain" {
-  [User\n---\nid\nusername\npasswordHash\nfavoriteGenre\ncreatedAt] as User
+package "Domain Layer" {
 
-  [UserStatistics\n---\nuserId\nactivityPoints] as UserStatistics
+  class User {
+  id
+  username
+  passwordHash
+  favoriteGenre
+  createdAt
+  }
 
-  [Media\n---\nid\ntype\ntitle\ndescription\nreleaseYear\nageRestriction\ncreatorId] as Media
+  class Media {
+  id
+  type
+  title
+  description
+  releaseYear
+  ageRestriction
+  creatorId
+  genres
+  }
 
-  [Genre\n---\ngenreId\nname] as Genre
+  class Rating {
+  id
+  mediaId
+  userId
+  stars
+  comment
+  confirmed
+  createdAt
+  }
 
-  [Rating\n---\nid\nmediaId\nuserId\nstars\ncomment\nconfirmed\ncreatedAt] as Rating
+  class Favorite {
+  userId
+  mediaId
+  }
+
+  class LeaderboardEntry
+  class TopRatedMedia
+  class MostLikedRating
 }
 
-package "Infrastructure" {
-  [UserRepository\n---\nsave()\ngetById()\ngetByUsername()\nupdateUser()\ndeleteById()] as UserRepository
+package "Infrastructure Layer" {
 
-  [UserStatisticsRepository\n---\ngetByUserId()\nupdateActivityPoints()] as UserStatisticsRepository
-
-  [MediaRepository\n---\nsave()\ngetById()\ngetAllMedia()\nsearchMedia()\ndeleteById()\naddGenres()\nremoveGenres()\ngetMediaGenres()] as MediaRepository
-
-  [GenreRepository\n---\ngetAll()\ngetById()\ngetByName()\ncreate()] as GenreRepository
-
-  [RatingRepository\n---\nsave()\ngetById()\ngetByMediaId()\ngetByUserId()\nupdate()\ndelete()] as RatingRepository
-
-  [RatingLikeRepository\n---\naddLike()\nremoveLike()\ngetLikesCount()\nhasUserLiked()] as RatingLikeRepository
-
-  [FavoriteRepository\n---\naddFavorite()\nremoveFavorite()\ngetUserFavorites()\nisFavorite()] as FavoriteRepository
-
-  [TokenRepository\n---\ncreateToken()\ngetUserIdFromToken()\ndeleteToken()\nupdateLastUsed()] as TokenRepository
+  class UserRepository
+  class MediaRepository
+  class RatingRepository
+  class FavoriteRepository
+  class TokenRepository
+  class LeaderboardRepository
 }
 
-database "database" {
-  [users\n---\nid\nusername\npassword_hash\nfavorite_genre\ncreated_at]
+database "Database" {
 
-  [genres\n---\ngenre_id\nname]
+  class users <<table>>
+  class media <<table>>
+  class ratings <<table>>
+  class favorites <<table>>
+  class rating_likes <<table>>
+  class tokens <<table>>
+  class media_genres <<table>>
 
-  [media\n---\nid\ntype\ntitle\ndescription\nrelease_year\nage_restriction\ncreator_id]
-
-  [media_genres\n---\nmedia_id\ngenre_id]
-
-  [ratings\n---\nid\nmedia_id\nuser_id\nstars\ncomment\nconfirmed\ncreated_at]
-
-  [rating_likes\n---\nrating_id\nuser_id]
-
-  [favorites\n---\nuser_id\nmedia_id]
-
-  [tokens\n---\nid\ntoken\nuser_id\ncreated_at\nexpires_at\nlast_used_at]
 }
 
-' Presentation -> Application flows
+
+' Presentation → Services
 UserHandler --> UserService
+UserHandler --> FavoriteService
+UserHandler --> RecommendationService
+
 MediaHandler --> MediaService
+
 RatingHandler --> RatingService
 
-' Application -> Domain flows
-UserService --> User
-UserService --> UserStatistics
-MediaService --> Media
-MediaService --> Genre
-RatingService --> Rating
+LeaderboardHandler --> LeaderboardService
 
-' Application -> Infrastructure flows
+' Services → Domain
+UserService --> User
+MediaService --> Media
+RatingService --> Rating
+FavoriteService --> Favorite
+RecommendationService --> Media
+LeaderboardService --> LeaderboardEntry
+LeaderboardService --> TopRatedMedia
+LeaderboardService --> MostLikedRating
+
+' Services → Infrastructure
 UserService --> UserRepository
-UserService --> UserStatisticsRepository
-UserService --> FavoriteRepository
 UserService --> TokenRepository
 
 MediaService --> MediaRepository
-MediaService --> GenreRepository
+
+FavoriteService --> FavoriteRepository
+FavoriteService --> UserRepository
+FavoriteService --> MediaRepository
 
 RatingService --> RatingRepository
-RatingService --> RatingLikeRepository
+RatingService --> MediaRepository
+RatingService --> UserRepository
 
-' Infrastructure -> Database flows
+RecommendationService --> MediaRepository
+RecommendationService --> RatingRepository
+RecommendationService --> FavoriteRepository
+
+LeaderboardService --> LeaderboardRepository
+
+' Infrastructure → Database
 UserRepository --> users
-UserStatisticsRepository --> user_statistics
 MediaRepository --> media
-GenreRepository --> genres
 MediaRepository --> media_genres
 RatingRepository --> ratings
-RatingLikeRepository --> rating_likes
 FavoriteRepository --> favorites
+RatingRepository --> rating_likes
 TokenRepository --> tokens
+
 @enduml
