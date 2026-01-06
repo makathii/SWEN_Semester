@@ -47,42 +47,10 @@ public class FavoriteService {
         return favoriteRepository.deleteFavorite(userId,mediaId);
     }
 
-    public boolean toggleFavorite(int userId, int mediaId) {
-        if(userRepository.getById(userId)==null){
-            throw new IllegalArgumentException("User not found");
-        }
-        if(mediaRepository.getById(mediaId)==null){
-            throw new IllegalArgumentException("Media not found");
-        }
-        if(favoriteRepository.isFavorite(userId,mediaId)){
-            return favoriteRepository.deleteFavorite(userId,mediaId);
-        }else{
-            Favorite favorite = new Favorite(userId,mediaId);
-            return favoriteRepository.addFavorite(favorite);
-        }
-    }
-
     public List<Media> getUserFavorites(int userId){
         if(userRepository.getById(userId)==null){
             throw new IllegalArgumentException("User not found");
         }
         return favoriteRepository.getUserFavorites(userId);
-    }
-
-    public boolean isFavorite(int userId, int mediaId) {
-        if(userRepository.getById(userId)==null){
-            throw new IllegalArgumentException("User not found");
-        }
-        if(mediaRepository.getById(mediaId)==null){
-            throw new IllegalArgumentException("Media not found");
-        }
-        return favoriteRepository.isFavorite(userId,mediaId);
-    }
-
-    public int getFavoriteCountForMedia(int mediaId){
-        if(mediaRepository.getById(mediaId)==null){
-            throw new IllegalArgumentException("Media not found");
-        }
-        return favoriteRepository.getFavoriteCountForMedia(mediaId);
     }
 }

@@ -17,10 +17,6 @@ public class JsonUtil {
         return objectMapper.readValue(json, Map.class);
     }
 
-    public static String toJson(Object object) throws IOException {
-        return objectMapper.writeValueAsString(object);
-    }
-
     public static String mediaToJson(Media media) throws IOException {
         return objectMapper.writeValueAsString(media);
     }
@@ -35,7 +31,7 @@ public class JsonUtil {
     }
 
     public static String ratingListToJson(List<Rating> ratings) {
-        // Implement JSON serialization for ratings list
+        //implement JSON serialization for ratings list
         ObjectMapper mapper = new ObjectMapper();
         try {
             return mapper.writeValueAsString(ratings);
@@ -44,7 +40,7 @@ public class JsonUtil {
         }
     }
 
-    public static String objectToJson(Object object) throws JsonProcessingException, JsonProcessingException {
+    public static String objectToJson(Object object) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
         return mapper.writeValueAsString(object);
     }

@@ -124,17 +124,6 @@ public class RatingRepository implements IRepository<Rating> {
         return null;
     }
 
-    public List<Rating> getAllRatings() {
-        String sql = "SELECT * FROM ratings ORDER BY created_at DESC";
-
-        try (Connection conn = DatabaseManager.INSTANCE.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            return executeRatingQuery(pstmt);
-        } catch (SQLException e) {
-            System.err.println("Error getting all ratings: " + e.getMessage());
-            return new ArrayList<>();
-        }
-    }
-
     public boolean confirmRating(int ratingId) {
         String sql = "UPDATE ratings SET confirmed = true WHERE id = ?";
 
@@ -178,7 +167,7 @@ public class RatingRepository implements IRepository<Rating> {
         return 0;
     }
 
-    // HELPER METHODS
+    //HELPERS
     private List<Rating> executeRatingQuery(PreparedStatement pstmt) throws SQLException {
         List<Rating> ratingList = new ArrayList<>();
         try (ResultSet rs = pstmt.executeQuery()) {

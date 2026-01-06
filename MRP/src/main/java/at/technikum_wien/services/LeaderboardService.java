@@ -23,14 +23,14 @@ public class LeaderboardService {
 
     public List<TopRatedMedia> getTopRatedMedia(int limit) {
         if (limit <= 0 || limit > 100) {
-            limit = 20; // default
+            limit = 20; //default
         }
         return leaderboardRepository.getTopRatedMedia(limit);
     }
 
     public List<MostLikedRating> getMostLikedRatings(int limit) {
         if (limit <= 0 || limit > 100) {
-            limit = 20; // default
+            limit = 20; //default
         }
         return leaderboardRepository.getMostLikedRatings(limit);
     }

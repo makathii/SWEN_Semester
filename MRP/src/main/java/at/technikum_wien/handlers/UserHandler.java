@@ -101,7 +101,7 @@ public class UserHandler implements HttpHandler {
             }
 
             var loginResult = userService.loginUser(username, password);
-            String response = String.format("{\"message\": \"Login successful\", \"token\": \"%s\", \"userId\": %d}", loginResult.token, loginResult.userId);
+            String response = String.format("{\"message\": \"Login successful\", \"token\": \"%s\", \"userId\": %d}", loginResult.token(), loginResult.userId());
             sendResponse(exchange, 200, response);
 
         } catch (SecurityException e) {
@@ -139,17 +139,17 @@ public class UserHandler implements HttpHandler {
                 return;
             }
 
-            // Get user statistics
+            //get user statistics
             var ratings = ratingService.getRatingsByUser(userId);
             var createdMedia = mediaService.getMediaByCreator(userId);
 
-            // Calculate statistics
+            //calculate statistics
             int totalRatings = ratings.size();
             double averageRating = ratings.stream().mapToInt(r -> r.getStars()).average().orElse(0.0);
 
             String favoriteGenre = "None";
             if (!ratings.isEmpty()) {
-                favoriteGenre = "Action"; //Placeholder
+                favoriteGenre = "Action"; //placeholder
             }
 
             String response = String.format("{\"user\": {\"id\": %d, \"username\": \"%s\", \"createdAt\": \"%s\"}, " + "\"statistics\": {\"totalRatings\": %d, \"averageRating\": %.2f, \"mediaCreated\": %d, \"favoriteGenre\": \"%s\"}}", user.getId(), user.getUsername(), user.getCreatedAt(), totalRatings, averageRating, createdMedia.size(), favoriteGenre);
@@ -161,7 +161,6 @@ public class UserHandler implements HttpHandler {
         }
     }
 
-    // In the handleUpdateUserProfile method, update this section:
     private void handleUpdateUserProfile(HttpExchange exchange, int userId, String requestBody) throws IOException {
         try {
             Integer requestingUserId = AuthHelper.getUserIdFromAuthHeader(exchange);
@@ -180,20 +179,17 @@ public class UserHandler implements HttpHandler {
                 return;
             }
 
-            // Update username if provided
+            //update username if provided
             if (newUsername != null && !newUsername.trim().isEmpty()) {
                 user.setUsername(newUsername);
             }
 
-            // Update favorite genre if provided
+            //update favorite genre if provided
             if (newFavoriteGenre != null) {
-                // Allow empty string to clear favorite genre
+                //allow empty string to clear favorite genre
                 if (newFavoriteGenre.trim().isEmpty()) {
                     user.setFavoriteGenre(null);
                 } else {
-                    // Validate that the genre exists
-                    // You can either accept genre_id (as number) or genre name
-                    // The repository will handle both cases
                     user.setFavoriteGenre(newFavoriteGenre.trim());
                 }
             }
@@ -256,7 +252,7 @@ public class UserHandler implements HttpHandler {
         try {
             int userId = extractIdFromPath(path, userIdPattern);
 
-            // Verify the requesting user has access
+            //verify requesting user has access
             Integer requestingUserId = AuthHelper.getUserIdFromAuthHeader(exchange);
             if (requestingUserId == null || requestingUserId != userId) {
                 sendResponse(exchange, 403, "{\"error\": \"Access denied\"}");
@@ -283,7 +279,7 @@ public class UserHandler implements HttpHandler {
 
             String response = JsonUtil.mediaListToJson(recommendations);
 
-            // Add recommendation metadata to response
+            //add recommendation metadata to response
             String enhancedResponse = String.format(
                     "{\"recommendations\": %s, \"type\": \"%s\", \"userId\": %d, \"count\": %d}",
                     response, type, userId, recommendations.size()

@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Set;
 
 public class MediaRepository implements IRepository<Media> {
-    //interface functions
     @Override
     public Media save(Media media) {
         String sql = "";
@@ -90,22 +89,6 @@ public class MediaRepository implements IRepository<Media> {
         return null;
     }
 
-    public Media getByName(String name) throws SQLException {
-        String sql = "SELECT m.*, array_agg(g.name) as genres " + "FROM media m " + "LEFT JOIN media_genres mg ON m.id = mg.media_id " + "LEFT JOIN genres g ON mg.genre_id = g.genre_id " + "WHERE LOWER(m.title) = LOWER(?) " + "GROUP BY m.id";
-
-        try (Connection conn = DatabaseManager.INSTANCE.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, name);
-            try (ResultSet rs = pstmt.executeQuery()) {
-                if (rs.next()) {
-                    return mapResultSetToMedia(rs);
-                }
-                return null;
-            }
-        } catch (SQLException e) {
-            throw new SQLException("Error searching media by title: " + e.getMessage(), e);
-        }
-    }
-
     public List<Media> getAllMedia() {
         String sql = "SELECT m.*, array_agg(g.name) as genres " + "FROM media m " + "LEFT JOIN media_genres mg ON m.id = mg.media_id " + "LEFT JOIN genres g ON mg.genre_id = g.genre_id " + "GROUP BY m.id " + "ORDER BY m.id";
 
@@ -130,16 +113,6 @@ public class MediaRepository implements IRepository<Media> {
             }
         }
         return genreIds;
-    }
-
-    private int getGenreId(Connection conn, String genreName) throws SQLException {
-        String sql = "SELECT genre_id FROM genres WHERE name = ?";
-        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, genreName);
-            try (ResultSet rs = stmt.executeQuery()) {
-                return rs.next() ? rs.getInt("genre_id") : -1;
-            }
-        }
     }
 
     private void saveGenres(Connection conn, int mediaId, List<String> newGenres) throws SQLException {
@@ -188,7 +161,8 @@ public class MediaRepository implements IRepository<Media> {
             }
         }
 
-        //genre doesn't exist -> create it
+        //genre doesn't exist -> create it -> this kind of sucks because there maybe should only be ones to choose but I didnt want
+        //to have a thousand errors just bcs a genre doesnt exist
         String insertSql = "INSERT INTO genres (name) VALUES (?) RETURNING genre_id";
         try (PreparedStatement insertStmt = conn.prepareStatement(insertSql)) {
             insertStmt.setString(1, genreName.toLowerCase());
@@ -203,7 +177,7 @@ public class MediaRepository implements IRepository<Media> {
         return -1;
     }
 
-    //HELPER
+    //HELPERS
     private Media mapResultSetToMedia(ResultSet rs) throws SQLException {
         String[] genreArray = (String[]) rs.getArray("genres").getArray();
         List<String> genres = new ArrayList<>();

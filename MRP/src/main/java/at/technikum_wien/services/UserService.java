@@ -4,8 +4,6 @@ import at.technikum_wien.models.entities.User;
 import at.technikum_wien.database.repositories.UserRepository;
 import at.technikum_wien.database.repositories.TokenRepository;
 import at.technikum_wien.security.PasswordHasher;
-import java.util.List;
-import java.util.Map;
 
 public class UserService {
     private final UserRepository userRepository;
@@ -44,24 +42,17 @@ public class UserService {
         return new LoginResult(token, user.getId());
     }
 
-    public static class LoginResult {
-        public final String token;
-        public final int userId;
-
-        public LoginResult(String token, int userId) {
-            this.token = token;
-            this.userId = userId;
-        }
+    public record LoginResult(String token, int userId) {
     }
 
     public User updateUser(User user) {
-        // Check if username is being changed and if it's already taken
+        //check if username is changed & if it's already taken
         User existingUser = userRepository.getById(user.getId());
         if (existingUser == null) {
             throw new IllegalArgumentException("User not found");
         }
 
-        // If username is being changed, check if new username is available
+        //if username is changed, check if new username is available
         if (!existingUser.getUsername().equals(user.getUsername())) {
             User userWithNewUsername = userRepository.getByName(user.getUsername());
             if (userWithNewUsername != null && userWithNewUsername.getId() != user.getId()) {
@@ -69,7 +60,7 @@ public class UserService {
             }
         }
 
-        // If favoriteGenre is not provided in the update, keep the existing one
+        //if favoriteGenre is not provided in update, keep existing one
         if (user.getFavoriteGenre() == null && existingUser.getFavoriteGenre() != null) {
             user.setFavoriteGenre(existingUser.getFavoriteGenre());
         }

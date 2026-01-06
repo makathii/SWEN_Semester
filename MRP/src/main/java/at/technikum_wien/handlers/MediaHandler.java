@@ -204,7 +204,7 @@ public class MediaHandler implements HttpHandler {
             }
             Map<String, Object> mediaData = JsonUtil.parseJsonToMap(requestBody);
 
-            //handle both "type" and "mediaType" for compatibility-> still sucks
+            //handle both "type" & "mediaType" for compatibility-> still sucks
             if (mediaData.containsKey("type")) {
                 existingMedia.setType((String) mediaData.get("type"));
             } else if (mediaData.containsKey("mediaType")) {
@@ -364,7 +364,7 @@ public class MediaHandler implements HttpHandler {
 
         //for paths like /api/media/1/rate, we need the third-to-last part (index: parts.length - 2)
         //for paths like /api/media/1, we need the last part (index: parts.length - 1)
-        //this is kinda tricky
+        //this kinda sucks too
 
         if (path.endsWith("/rate") || path.endsWith("/favorite")) {
             //for /api/media/1/rate, get the media ID which is at index parts.length - 2

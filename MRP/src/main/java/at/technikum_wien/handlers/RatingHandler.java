@@ -176,17 +176,17 @@ public class RatingHandler implements HttpHandler {
 
     private void handleUpdateRating(HttpExchange exchange, int ratingId, String requestBody) throws IOException {
         try {
-            // Get user ID from authentication
+            //get user ID from authentication
             Integer userId = AuthHelper.getUserIdFromAuthHeader(exchange);
             if (userId == null) {
                 sendResponse(exchange, 401, "{\"error\": \"Authentication required\"}");
                 return;
             }
 
-            // Parse request body
+            //parse request body
             Map<String, Object> ratingData = parseRequestBody(requestBody);
 
-            // Extract fields
+            //extract fields
             if (!ratingData.containsKey("stars")) {
                 sendResponse(exchange, 400, "{\"error\": \"Stars rating is required\"}");
                 return;
@@ -207,19 +207,17 @@ public class RatingHandler implements HttpHandler {
 
             String comment = (String) ratingData.getOrDefault("comment", "");
 
-            // Validate stars range
+            //validate stars
             if (stars < 1 || stars > 5) {
                 sendResponse(exchange, 400, "{\"error\": \"Stars must be between 1 and 5\"}");
                 return;
             }
 
-            // Call service to update rating
             Rating updatedRating = ratingService.updateRating(ratingId, stars, comment, userId);
 
-            // Get updated like count
             int likeCount = ratingService.getRatingLikeCount(ratingId);
 
-            // Create response
+            //create response
             Map<String, Object> responseData = Map.of("message", "Rating updated successfully", "rating", Map.of("id", updatedRating.getId(), "media_id", updatedRating.getMedia_id(), "user_id", updatedRating.getUser_id(), "stars", updatedRating.getStars(), "comment", updatedRating.getComment(), "confirmed", updatedRating.getConfirmed(), "created_at", updatedRating.getCreated_at(), "like_count", likeCount));
 
             String response = objectMapper.writeValueAsString(responseData);
@@ -237,7 +235,6 @@ public class RatingHandler implements HttpHandler {
 
     private void handleDeleteRating(HttpExchange exchange, int ratingId) throws IOException {
         //extract user ID from query parameters
-        String query = exchange.getRequestURI().getQuery();
         Integer userId = AuthHelper.getUserIdFromAuthHeader(exchange);
 
         if (userId == 0) {
@@ -279,7 +276,7 @@ public class RatingHandler implements HttpHandler {
         }
     }
 
-    // HELPER METHODS
+    //HELPERS
     private int extractIdFromPath(String path, Pattern pattern) {
         Matcher matcher = pattern.matcher(path);
         if (matcher.find()) {
@@ -292,7 +289,7 @@ public class RatingHandler implements HttpHandler {
         if (requestBody == null || requestBody.trim().isEmpty()) {
             throw new IllegalArgumentException("Request body is required");
         }
-        return objectMapper.readValue(requestBody, new TypeReference<Map<String, Object>>() {
+        return objectMapper.readValue(requestBody, new TypeReference<>() {
         });
     }
 

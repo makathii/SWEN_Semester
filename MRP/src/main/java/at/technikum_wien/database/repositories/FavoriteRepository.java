@@ -78,7 +78,7 @@ public class FavoriteRepository {
         return 0;
     }
 
-    //HELPER
+    //HELPERS
     private List<Media> executeMediaQuery(PreparedStatement pstmt) throws SQLException {
         List<Media> result = new ArrayList<>();
         try (ResultSet rs = pstmt.executeQuery()) {

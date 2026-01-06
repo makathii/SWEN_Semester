@@ -1,14 +1,12 @@
 package at.technikum_wien.handlers;
 
 import at.technikum_wien.services.LeaderboardService;
-import at.technikum_wien.security.AuthHelper;
 import at.technikum_wien.handlers.util.JsonUtil;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -31,16 +29,6 @@ public class LeaderboardHandler implements HttpHandler {
                 sendResponse(exchange, 405, "{\"error\": \"Method Not Allowed\"}");
                 return;
             }
-
-            // Leaderboard is public (no auth required)
-            // Optional: uncomment if you want auth
-            /*
-            Integer userId = AuthHelper.getUserIdFromAuthHeader(exchange);
-            if (userId == null) {
-                sendResponse(exchange, 401, "{\"error\": \"Authentication required\"}");
-                return;
-            }
-            */
 
             if (path.equals("/api/leaderboard")) {
                 handleGetLeaderboardSummary(exchange);

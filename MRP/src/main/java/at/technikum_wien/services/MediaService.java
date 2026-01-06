@@ -36,7 +36,7 @@ public class MediaService {
         }
     }
 
-    //search and filter methods
+    //search & filter methods
     public List<Media> searchMedia(String title, String genre, String mediaType, Integer releaseYear, Integer ageRestriction, String sortBy) {
         List<Media> allMedia = mediaRepository.getAllMedia();
 
@@ -44,7 +44,7 @@ public class MediaService {
             if ("title".equalsIgnoreCase(sortBy)) {
                 return m1.getTitle().compareToIgnoreCase(m2.getTitle());
             } else if ("releaseYear".equalsIgnoreCase(sortBy)) {
-                return Integer.compare(m2.getRelease_year(), m1.getRelease_year()); // newest first
+                return Integer.compare(m2.getRelease_year(), m1.getRelease_year()); //newest first
             } else if ("ageRestriction".equalsIgnoreCase(sortBy)) {
                 return Integer.compare(m1.getAge_restriction(), m2.getAge_restriction());
             }

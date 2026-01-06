@@ -8,7 +8,6 @@ import at.technikum_wien.models.entities.Media;
 import at.technikum_wien.models.entities.User;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class RatingService {
     private final RatingRepository ratingRepository;
@@ -21,26 +20,26 @@ public class RatingService {
         this.userRepository = userRepository;
     }
 
-    // Rate a media entry
+    //rate media entry
     public Rating rateMedia(int mediaId, int userId, int stars, String comment) {
-        // Validate input
+        //validate input
         if (stars < 1 || stars > 5) {
             throw new IllegalArgumentException("Stars must be between 1 and 5");
         }
 
-        // Check if media exists
+        //check if media exists
         Media media = mediaRepository.getById(mediaId);
         if (media == null) {
             throw new IllegalArgumentException("Media not found with ID: " + mediaId);
         }
 
-        // Check if user exists
+        //check if user exists
         User user = userRepository.getById(userId);
         if (user == null) {
             throw new IllegalArgumentException("User not found with ID: " + userId);
         }
 
-        // Check if user has already rated this media
+        //check if user has already rated this media
         Rating existingRating = ratingRepository.getRatingByUserAndMedia(userId, mediaId);
         if (existingRating != null) {
             throw new IllegalStateException("User has already rated this media. Use update instead.");
@@ -61,43 +60,37 @@ public class RatingService {
         return savedRating;
     }
 
-     // Get ratings for media with comment visibility filtering
-     // - Stars are always visible
-     // - Comments are only visible if confirmed OR if the requesting user is the rating owner
-
-
-     // Get a single rating with comment visibility filtering
+     //get single rating with comment visibility filtering
     public Rating getPublicRating(int ratingId, Integer requestingUserId) {
         Rating rating = ratingRepository.getById(ratingId);
         if (rating == null) return null;
 
-        // Hide comment if not confirmed and user is not the owner
+        //hide comment if not confirmed & user is not owner
         if (!rating.getConfirmed() && (requestingUserId == null || rating.getUser_id() != requestingUserId)) {
             return createRatingWithHiddenComment(rating);
         }
         return rating;
     }
 
-     // Get user's own ratings - they always see their own comments
+     //get user's own ratings - always see their own comments
     public List<Rating> getRatingsByUser(int userId) {
         return ratingRepository.getAllRatingsByUser(userId);
-        // No filtering needed - user always sees their own ratings
     }
 
-    //Update a rating - if comment changes, it becomes unconfirmed again
+    //update a rating - if comment changes, it becomes unconfirmed again
     public Rating updateRating(int ratingId, int stars, String comment, int userId) {
-        // Validate input
+        //validate star input
         if (stars < 1 || stars > 5) {
             throw new IllegalArgumentException("Stars must be between 1 and 5");
         }
 
-        // Get existing rating
+        //get existing rating
         Rating existingRating = ratingRepository.getById(ratingId);
         if (existingRating == null) {
             throw new IllegalArgumentException("Rating not found with ID: " + ratingId);
         }
 
-        // Check if user owns this rating
+        //check if user owns this rating
         if (existingRating.getUser_id() != userId) {
             throw new SecurityException("User is not authorized to update this rating");
         }
@@ -105,10 +98,10 @@ public class RatingService {
         //check if comment changed - if so, it needs reconfirmation
         boolean commentChanged = !equals(existingRating.getComment(), comment);
         if (commentChanged) {
-            existingRating.setConfirmed(false); //comment changed, needs reconfirmation
+            existingRating.setConfirmed(false);
         }
 
-        // Update rating
+        //update rating
         existingRating.setStars(stars);
         existingRating.setComment(comment);
 
@@ -120,25 +113,25 @@ public class RatingService {
         return updatedRating;
     }
 
-     // Confirm a rating comment - makes it publicly visible
+     //confirm a rating comment - makes it publicly visible
     public boolean confirmRating(int ratingId, int userId) {
-        // Get existing rating
+        //get existing rating
         Rating existingRating = ratingRepository.getById(ratingId);
         if (existingRating == null) {
             throw new IllegalArgumentException("Rating not found with ID: " + ratingId);
         }
 
-        // Check if user owns this rating
+        //check if user owns this rating
         if (existingRating.getUser_id() != userId) {
             throw new SecurityException("User can only confirm their own ratings");
         }
 
-        // Check if there's a comment to confirm
+        //check if there's comment to confirm
         if (existingRating.getComment() == null || existingRating.getComment().trim().isEmpty()) {
             throw new IllegalStateException("No comment to confirm");
         }
 
-        // Check if already confirmed
+        //check if already confirmed
         if (existingRating.getConfirmed()) {
             throw new IllegalStateException("Comment is already confirmed");
         }
@@ -146,8 +139,7 @@ public class RatingService {
         return ratingRepository.confirmRating(ratingId);
     }
 
-    // Rest of your existing methods remain the same...
-    public boolean deleteRating(int ratingId, int userId) {
+    public void deleteRating(int ratingId, int userId) {
         Rating existingRating = ratingRepository.getById(ratingId);
         if (existingRating == null) {
             throw new IllegalArgumentException("Rating not found with ID: " + ratingId);
@@ -158,7 +150,6 @@ public class RatingService {
         }
 
         ratingRepository.deleteById(existingRating);
-        return true;
     }
 
     public boolean likeRating(int ratingId, int userId) {
@@ -196,7 +187,7 @@ public class RatingService {
         return rating;
     }
 
-    // HELPER METHODS
+    //HELPERS
     private Rating createRatingWithHiddenComment(Rating original) {
         return new Rating(original.getId(), original.getMedia_id(), original.getUser_id(), original.getStars(), null, // Hide the comment
                 original.getConfirmed(), original.getCreated_at());

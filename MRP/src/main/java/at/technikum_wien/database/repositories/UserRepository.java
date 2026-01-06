@@ -23,23 +23,22 @@ public class UserRepository implements IRepository<User> {
              PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             if (isInsert) {
-                // INSERT: only 2 parameters (username, password_hash)
+                //INSERT: only 2 parameters (username, password_hash)
                 pstmt.setString(1, user.getUsername());
                 pstmt.setString(2, user.getPasswordHash());
-                // NO parameter 3 for INSERT!
             } else {
-                // UPDATE: 4 parameters (username, password_hash, favorite_genre, id)
+                //UPDATE: 4 parameters (username, password_hash, favorite_genre, id)
                 pstmt.setString(1, user.getUsername());
                 pstmt.setString(2, user.getPasswordHash());
 
-                // Handle favorite_genre as INTEGER (foreign key) - FIXED HERE
+                //handle favorite_genre as INTEGER (foreign key)
                 if (user.getFavoriteGenre() != null && !user.getFavoriteGenre().isEmpty()) {
                     try {
-                        // Try to parse as integer (genre_id)
+                        //try to parse as integer (genre_id)
                         int genreId = Integer.parseInt(user.getFavoriteGenre());
                         pstmt.setInt(3, genreId);
                     } catch (NumberFormatException e) {
-                        // If it's a genre name, look up the genre_id
+                        //if it's a genre name, look up genre_id
                         int genreId = getGenreIdByName(user.getFavoriteGenre(), conn);
                         if (genreId > 0) {
                             pstmt.setInt(3, genreId);
@@ -65,17 +64,17 @@ public class UserRepository implements IRepository<User> {
                         }
                     }
                 } else {
-                    return user; // For UPDATE
+                    return user; //for update
                 }
             }
         } catch (SQLException e) {
             System.err.println("Error saving user: " + e.getMessage());
-            e.printStackTrace(); // Add this to see the full error
+            e.printStackTrace();
         }
         return null;
     }
 
-    // Helper method to get genre_id by genre name
+    //helper method to get genre_id by genre name
     private int getGenreIdByName(String genreName, Connection conn) throws SQLException {
         String sql = "SELECT genre_id FROM genres WHERE name = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -86,7 +85,7 @@ public class UserRepository implements IRepository<User> {
                 }
             }
         }
-        return -1; // Not found
+        return -1; //not found :(
     }
 
     @Override
@@ -109,7 +108,6 @@ public class UserRepository implements IRepository<User> {
     @Override
     public User getById(int id) {
         User foundUser = null;
-        // Modified query to get genre name instead of just ID
         String sql = """
             SELECT u.*, g.name as genre_name 
             FROM users u 
@@ -125,10 +123,10 @@ public class UserRepository implements IRepository<User> {
                     foundUser.setUsername(rs.getString("username"));
                     foundUser.setPasswordHash(rs.getString("password_hash"));
 
-                    // Get favorite genre name or ID
+                    //get favorite genre name or ID
                     String favoriteGenre = rs.getString("genre_name");
                     if (favoriteGenre == null) {
-                        // If no genre name, try to get the genre_id
+                        //if no genre name, try to get genre_id
                         int genreId = rs.getInt("favorite_genre");
                         if (!rs.wasNull()) {
                             favoriteGenre = String.valueOf(genreId);
@@ -147,7 +145,6 @@ public class UserRepository implements IRepository<User> {
 
     public User getByName(String name) {
         User foundUser = null;
-        // Modified query to get genre name instead of just ID
         String sql = """
             SELECT u.*, g.name as genre_name 
             FROM users u 
@@ -163,10 +160,10 @@ public class UserRepository implements IRepository<User> {
                     foundUser.setUsername(rs.getString("username"));
                     foundUser.setPasswordHash(rs.getString("password_hash"));
 
-                    // Get favorite genre name or ID
+                    //get favorite genre name/ID
                     String favoriteGenre = rs.getString("genre_name");
                     if (favoriteGenre == null) {
-                        // If no genre name, try to get the genre_id
+                        //if no genre name, try to get genre_id
                         int genreId = rs.getInt("favorite_genre");
                         if (!rs.wasNull()) {
                             favoriteGenre = String.valueOf(genreId);
@@ -181,71 +178,5 @@ public class UserRepository implements IRepository<User> {
             System.err.println("Error finding user by username: " + e.getMessage());
         }
         return foundUser;
-    }
-
-    public boolean updateFavoriteGenre(int userId, String favoriteGenre) {
-        String sql = "UPDATE users SET favorite_genre = ? WHERE id = ?";
-
-        try (Connection conn = DatabaseManager.INSTANCE.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            if (favoriteGenre == null || favoriteGenre.trim().isEmpty()) {
-                stmt.setNull(1, Types.INTEGER);
-            } else {
-                try {
-                    // Try to parse as integer (genre_id)
-                    int genreId = Integer.parseInt(favoriteGenre);
-                    stmt.setInt(1, genreId);
-                } catch (NumberFormatException e) {
-                    // If it's a genre name, look up the genre_id
-                    int genreId = getGenreIdByName(favoriteGenre, conn);
-                    if (genreId > 0) {
-                        stmt.setInt(1, genreId);
-                    } else {
-                        stmt.setNull(1, Types.INTEGER);
-                    }
-                }
-            }
-            stmt.setInt(2, userId);
-
-            int rows = stmt.executeUpdate();
-            return rows > 0;
-
-        } catch (SQLException e) {
-            System.err.println("Error updating favorite genre: " + e.getMessage());
-            return false;
-        }
-    }
-
-    public Map<String, Object> getUserStatistics(int userId) {
-        Map<String, Object> stats = new HashMap<>();
-        String sql = """
-            SELECT 
-                (SELECT COUNT(*) FROM ratings WHERE user_id = ?) as rating_count,
-                (SELECT COUNT(*) FROM favorites WHERE user_id = ?) as favorite_count,
-                (SELECT COUNT(*) FROM media WHERE creator_id = ?) as media_created_count,
-                (SELECT COALESCE(AVG(stars), 0) FROM ratings WHERE user_id = ?) as avg_rating
-            """;
-
-        try (Connection conn = DatabaseManager.INSTANCE.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setInt(1, userId);
-            stmt.setInt(2, userId);
-            stmt.setInt(3, userId);
-            stmt.setInt(4, userId);
-
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    stats.put("ratingCount", rs.getInt("rating_count"));
-                    stats.put("favoriteCount", rs.getInt("favorite_count"));
-                    stats.put("mediaCreatedCount", rs.getInt("media_created_count"));
-                    stats.put("averageRating", rs.getDouble("avg_rating"));
-                }
-            }
-        } catch (SQLException e) {
-            System.err.println("Error getting user statistics: " + e.getMessage());
-        }
-        return stats;
     }
 }

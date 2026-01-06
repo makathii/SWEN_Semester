@@ -92,9 +92,6 @@ public class Server {
         MISSING:
         all the testies ofc
         Recommendations dont make sense yet
-        Update User -> apparently we need an email column which I wasnt aware of, nice.
-        also it might be smart to save the favorite genre in the database?
         test all of the handle stuff deffo
-        meby rethink tokens hehe
      */
 }

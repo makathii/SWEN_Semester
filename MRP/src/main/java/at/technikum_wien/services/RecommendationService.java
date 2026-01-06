@@ -20,7 +20,7 @@ public class RecommendationService {
         this.favoriteRepository = favoriteRepository;
     }
 
-    //Get genre-based recommendations based on user's previously highly rated media
+    //get genre-based recommendations based on user's previously highly rated media
     public List<Media> getGenreBasedRecommendations(int userId, int limit) {
         List<Media> allMedia = mediaRepository.getAllMedia();
         List<Rating> userRatings = ratingRepository.getAllRatingsByUser(userId);
@@ -42,7 +42,7 @@ public class RecommendationService {
         }).limit(limit).collect(Collectors.toList());
     }
 
-    //Get content-based recommendations considering genre, media type, and age restriction
+    //get content-based recommendations considering genre, media type, and age restriction
     public List<Media> getContentBasedRecommendations(int userId, int limit) {
         List<Media> allMedia = mediaRepository.getAllMedia();
         List<Rating> userRatings = ratingRepository.getAllRatingsByUser(userId);
@@ -66,7 +66,7 @@ public class RecommendationService {
         return mediaScores.entrySet().stream().sorted(Map.Entry.<Media, Double>comparingByValue().reversed()).limit(limit).map(Map.Entry::getKey).collect(Collectors.toList());
     }
 
-    // HELPERS
+    //HELPERS
     private static class UserPreferences {
         Set<String> favoriteGenres = new HashSet<>();
         String preferredMediaType;
