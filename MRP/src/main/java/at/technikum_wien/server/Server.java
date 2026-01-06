@@ -90,8 +90,8 @@ public class Server {
     }
     /*
         MISSING:
-        all the testies ofc
         Recommendations dont make sense yet
         test all of the handle stuff deffo
+        the uml!!
      */
 }

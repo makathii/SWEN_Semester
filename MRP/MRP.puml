@@ -2,7 +2,7 @@
 title Media Ratings Platform
 
 package "Presentation" {
-  [UserHandler\n---\nhandleRegister()\nhandleLogin()\nhandleUserProfile()\nhandleUserRatings()\nhandleUserFavorites()] as UserHandler
+  [UserHandler\n---\nhandleRegister()\nhandleLogin()\nhandleUserProfile()\nhandleUserRatings()\nhandleUserFavorites()\nhandleUserStatistics()] as UserHandler
 
   [MediaHandler\n---\nhandleGetAllMedia()\nhandleGetMedia()\nhandleCreateMedia()\nhandleUpdateMedia()\nhandleDeleteMedia()\nhandleSearchMedia()\nhandleRateMedia()\nhandleFavoriteMedia()] as MediaHandler
 
@@ -10,7 +10,7 @@ package "Presentation" {
 }
 
 package "Application" {
-  [UserService\n---\nregisterUser()\nloginUser()\ngetUserProfile()\ngetUserRatings()\ngetUserFavorites()] as UserService
+  [UserService\n---\nregisterUser()\nloginUser()\ngetUserProfile()\ngetUserRatings()\ngetUserFavorites()\ngetUserStatistics()\nupdateUserProfile()] as UserService
 
   [MediaService\n---\ngetAllMedia()\ngetMediaById()\ncreateMedia()\nupdateMedia()\ndeleteMedia()\nsearchMedia()\ngetMediaByCreator()] as MediaService
 
@@ -18,51 +18,85 @@ package "Application" {
 }
 
 package "Domain" {
-  [User\n---\nid\nusername\npasswordHash\ncreatedAt] as User
+  [User\n---\nid\nusername\npasswordHash\nfavoriteGenre\ncreatedAt] as User
 
-  [Media\n---\nid\ntype\ntitle\ndescription\nrelease_year\nage_restriction\ncreator_id\ngenres] as Media
+  [UserStatistics\n---\nuserId\nactivityPoints] as UserStatistics
 
-  [Rating\n---\nid\nmedia_id\nuser_id\nstars\ncomment\nconfirmed\ncreated_at] as Rating
+  [Media\n---\nid\ntype\ntitle\ndescription\nreleaseYear\nageRestriction\ncreatorId] as Media
+
+  [Genre\n---\ngenreId\nname] as Genre
+
+  [Rating\n---\nid\nmediaId\nuserId\nstars\ncomment\nconfirmed\ncreatedAt] as Rating
 }
 
 package "Infrastructure" {
-  [UserRepository\n---\nsave()\ngetById()\ngetByUsername()\ngetByName()\ndeleteById()] as UserRepository
+  [UserRepository\n---\nsave()\ngetById()\ngetByUsername()\nupdateUser()\ndeleteById()] as UserRepository
 
-  [MediaRepository\n---\nsave()\ngetById()\ngetByName()\ngetAllMedia()\ndeleteById()\nsaveGenres()\ngetOrCreateGenreId()\ngetCurrentGenreIds()] as MediaRepository
+  [UserStatisticsRepository\n---\ngetByUserId()\nupdateActivityPoints()] as UserStatisticsRepository
 
-  [TokenRepository\n---\ncreateToken()\ngetUserIdFromToken()\ndeleteToken()] as TokenRepository
+  [MediaRepository\n---\nsave()\ngetById()\ngetAllMedia()\nsearchMedia()\ndeleteById()\naddGenres()\nremoveGenres()\ngetMediaGenres()] as MediaRepository
+
+  [GenreRepository\n---\ngetAll()\ngetById()\ngetByName()\ncreate()] as GenreRepository
+
+  [RatingRepository\n---\nsave()\ngetById()\ngetByMediaId()\ngetByUserId()\nupdate()\ndelete()] as RatingRepository
+
+  [RatingLikeRepository\n---\naddLike()\nremoveLike()\ngetLikesCount()\nhasUserLiked()] as RatingLikeRepository
+
+  [FavoriteRepository\n---\naddFavorite()\nremoveFavorite()\ngetUserFavorites()\nisFavorite()] as FavoriteRepository
+
+  [TokenRepository\n---\ncreateToken()\ngetUserIdFromToken()\ndeleteToken()\nupdateLastUsed()] as TokenRepository
 }
 
 database "database" {
-  [favorites\n---\nuser_id\nmedia_id]
+  [users\n---\nid\nusername\npassword_hash\nfavorite_genre\ncreated_at]
+
   [genres\n---\ngenre_id\nname]
+
   [media\n---\nid\ntype\ntitle\ndescription\nrelease_year\nage_restriction\ncreator_id]
+
   [media_genres\n---\nmedia_id\ngenre_id]
-  [rating_likes\n---\nrating_id\nuser_id]
+
   [ratings\n---\nid\nmedia_id\nuser_id\nstars\ncomment\nconfirmed\ncreated_at]
-  [tokens\n---\ntoken\nuser_id]
-  [users\n---\nid\nusername\npassword_hash\ncreated_at]
+
+  [rating_likes\n---\nrating_id\nuser_id]
+
+  [favorites\n---\nuser_id\nmedia_id]
+
+  [tokens\n---\nid\ntoken\nuser_id\ncreated_at\nexpires_at\nlast_used_at]
 }
 
-' flow arrows
+' Presentation -> Application flows
 UserHandler --> UserService
 MediaHandler --> MediaService
 RatingHandler --> RatingService
 
+' Application -> Domain flows
+UserService --> User
+UserService --> UserStatistics
+MediaService --> Media
+MediaService --> Genre
+RatingService --> Rating
+
+' Application -> Infrastructure flows
 UserService --> UserRepository
-MediaService --> MediaRepository
+UserService --> UserStatisticsRepository
+UserService --> FavoriteRepository
 UserService --> TokenRepository
 
-UserRepository --> users
-MediaRepository --> media
-MediaRepository --> genres
-MediaRepository --> media_genres
-TokenRepository --> tokens
-RatingService --> ratings
-RatingService --> rating_likes
-UserService --> favorites
+MediaService --> MediaRepository
+MediaService --> GenreRepository
 
-UserService --> User
-MediaService --> Media
-RatingService --> Rating
+RatingService --> RatingRepository
+RatingService --> RatingLikeRepository
+
+' Infrastructure -> Database flows
+UserRepository --> users
+UserStatisticsRepository --> user_statistics
+MediaRepository --> media
+GenreRepository --> genres
+MediaRepository --> media_genres
+RatingRepository --> ratings
+RatingLikeRepository --> rating_likes
+FavoriteRepository --> favorites
+TokenRepository --> tokens
 @enduml

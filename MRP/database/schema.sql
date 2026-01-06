@@ -13,13 +13,6 @@ CREATE TABLE users
     created_at     TIMESTAMP                  DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE user_statistics
-(
-    user_id         INT REFERENCES users (id),
-    activity_points INT DEFAULT 0
-);
-
-
 CREATE TABLE media
 (
     id              SERIAL PRIMARY KEY,
